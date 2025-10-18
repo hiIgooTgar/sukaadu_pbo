@@ -179,6 +179,12 @@ public class signUpPage extends javax.swing.JFrame {
 
         String hashedPassword = config.hashUtils.hashMD5(passwordInput);
         Connection conn = connection.getConnection();
+        
+        if (!config.validasiEmail.isValidEmail(emailInput)) {
+            JOptionPane.showMessageDialog(this, "Format email tidak valid (contoh: user@domain.com).", "Peringatan", JOptionPane.WARNING_MESSAGE);
+            inputEmail.setText(""); 
+            return;
+        }
 
         if (cekEmailDuplikat(conn, emailInput)) {
             JOptionPane.showMessageDialog(this, "Email ini sudah terdaftar. Silakan gunakan email lain.", "Registrasi Gagal", JOptionPane.ERROR_MESSAGE);

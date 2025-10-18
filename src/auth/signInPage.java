@@ -134,6 +134,12 @@ public class signInPage extends javax.swing.JFrame {
             JOptionPane.showMessageDialog(this, "Password harus diisi!", "Peringatan", JOptionPane.WARNING_MESSAGE);
             return;
         }
+        
+        if (!config.validasiEmail.isValidEmail(emailInput)) {
+            JOptionPane.showMessageDialog(this, "Format email tidak valid (contoh: user@domain.com).", "Peringatan", JOptionPane.WARNING_MESSAGE);
+            inputEmail.setText(""); 
+            return;
+        }
 
         String hashedInputPassword = config.hashUtils.hashMD5(passwordInput);
         Connection conn = connection.getConnection();
