@@ -125,13 +125,13 @@ public class signInPage extends javax.swing.JFrame {
         String passwordInput = new String(inputPassword.getPassword());
 
         if (emailInput.isEmpty() && passwordInput.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Email dan Password tidak boleh kosong!", "Peringatan", JOptionPane.WARNING_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Email dan Password harus diisi!", "Peringatan", JOptionPane.WARNING_MESSAGE);
             return;
         } else if (emailInput.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Email tidak boleh kosong!", "Peringatan", JOptionPane.WARNING_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Email harus diisi!", "Peringatan", JOptionPane.WARNING_MESSAGE);
             return;
         } else if (passwordInput.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Password tidak boleh kosong!", "Peringatan", JOptionPane.WARNING_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Password harus diisi!", "Peringatan", JOptionPane.WARNING_MESSAGE);
             return;
         }
 
@@ -148,20 +148,25 @@ public class signInPage extends javax.swing.JFrame {
                     if (hashedInputPassword.equals(hashedPasswordDB)) {
                         String role = rs.getString("role");
                         String namaUsers = rs.getString("nama");
+                        int statusAccount = rs.getInt("status");
                         
-                        if (role.equals("admin")) {
-                            JOptionPane.showMessageDialog(this, "Selamat datang, " + namaUsers, "Login Berhasil", JOptionPane.INFORMATION_MESSAGE);
-                            admin.dashboardAdmin dashboardAdmin = new admin.dashboardAdmin();
-                            dashboardAdmin.setVisible(true);
-                            this.dispose();
-                        } else if (role.equals("masyarakat")) {
-                            JOptionPane.showMessageDialog(this, "Selamat datang, " + namaUsers, "Login Berhasil", JOptionPane.INFORMATION_MESSAGE);
-                            masyarakat.dashboardMasyarakat dashboardMasyarakat = new masyarakat.dashboardMasyarakat();
-                            dashboardMasyarakat.setVisible(true);
-                            this.dispose();
+                        if(statusAccount == 1) {
+                            if (role.equals("admin")) {
+                                JOptionPane.showMessageDialog(this, "Selamat datang, " + namaUsers, "Login Berhasil", JOptionPane.INFORMATION_MESSAGE);
+                                admin.dashboardAdmin dashboardAdmin = new admin.dashboardAdmin();
+                                dashboardAdmin.setVisible(true);
+                                this.dispose();
+                            } else if (role.equals("masyarakat")) {
+                                JOptionPane.showMessageDialog(this, "Selamat datang, " + namaUsers, "Login Berhasil", JOptionPane.INFORMATION_MESSAGE);
+                                masyarakat.dashboardMasyarakat dashboardMasyarakat = new masyarakat.dashboardMasyarakat();
+                                dashboardMasyarakat.setVisible(true);
+                                this.dispose();
 
+                            } else {
+                                JOptionPane.showMessageDialog(this, "Role pengguna tidak valid.", "Error", JOptionPane.ERROR_MESSAGE);
+                            } 
                         } else {
-                            JOptionPane.showMessageDialog(this, "Role pengguna tidak valid.", "Error", JOptionPane.ERROR_MESSAGE);
+                           JOptionPane.showMessageDialog(this, "Akun Anda saat ini dinonaktifkan. Silakan hubungi Administrator.", "Login Gagal: Akun Non-aktif", JOptionPane.WARNING_MESSAGE);
                         }
                     } else {
                         JOptionPane.showMessageDialog(this, "Email atau Password salah!", "Login Gagal", JOptionPane.ERROR_MESSAGE);
