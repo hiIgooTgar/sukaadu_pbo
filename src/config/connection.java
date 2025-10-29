@@ -10,26 +10,19 @@ public class connection {
     public static Connection getConnection() {
         if (conn == null) {
             try {
-                // 1. Definisikan detail koneksi
                 String url = "jdbc:mysql://localhost:3306/sukaadu_pbo"; 
                 String user = "root"; 
                 String password = "";
                 
-                // 2. Muat Driver secara eksplisit dengan class baru (Opsional, tapi aman jika menggunakan versi lama JDK/Connector)
-                // Perubahan: Menggunakan driver class yang baru 'com.mysql.cj.jdbc.Driver'
-                // CATATAN: Langkah ini bisa dihilangkan jika menggunakan Connector/J 8.0+ dan JDK modern.
                 Class.forName("com.mysql.cj.jdbc.Driver");
-                
-                // 3. Buat koneksi
                 conn = DriverManager.getConnection(url, user, password);
-                
             } catch (SQLException e) {
                 JOptionPane.showMessageDialog(null, "Koneksi Database Gagal: Cek XAMPP/MySQL dan konfigurasi: " + e.getMessage(), "Error SQL", JOptionPane.ERROR_MESSAGE);
                 conn = null; // Pastikan conn tetap null
             } catch (ClassNotFoundException e) {
                 JOptionPane.showMessageDialog(null, "Driver MySQL tidak ditemukan. Pastikan MySQL Connector/J sudah ditambahkan ke Libraries.", "Error Driver", JOptionPane.ERROR_MESSAGE);
                 conn = null;
-                System.exit(0); // Hentikan jika driver tidak ada
+                System.exit(0); 
             }
         }
         return conn;
