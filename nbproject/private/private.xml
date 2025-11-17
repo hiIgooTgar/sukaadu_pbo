@@ -2,6 +2,13 @@
 <project-private xmlns="http://www.netbeans.org/ns/project-private/1">
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
-        <group/>
+        <group>
+            <file>file:/C:/Users/USER/Documents/NetBeansProjects/SukaAdu_PBO/src/admin/dashboardAdmin.java</file>
+            <file>file:/C:/Users/USER/Documents/NetBeansProjects/SukaAdu_PBO/src/config/sessionValidator.java</file>
+            <file>file:/C:/Users/USER/Documents/NetBeansProjects/SukaAdu_PBO/src/config/userSession.java</file>
+            <file>file:/C:/Users/USER/Documents/NetBeansProjects/SukaAdu_PBO/src/auth/signInPage.java</file>
+            <file>file:/C:/Users/USER/Documents/NetBeansProjects/SukaAdu_PBO/src/auth/signUpPage.java</file>
+            <file>file:/C:/Users/USER/Documents/NetBeansProjects/SukaAdu_PBO/src/masyarakat/dashboardMasyarakat.java</file>
+        </group>
     </open-files>
 </project-private>

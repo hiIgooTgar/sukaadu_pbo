@@ -18,7 +18,7 @@ public class connection {
                 conn = DriverManager.getConnection(url, user, password);
             } catch (SQLException e) {
                 JOptionPane.showMessageDialog(null, "Koneksi Database Gagal: Cek XAMPP/MySQL dan konfigurasi: " + e.getMessage(), "Error SQL", JOptionPane.ERROR_MESSAGE);
-                conn = null; // Pastikan conn tetap null
+                conn = null;
             } catch (ClassNotFoundException e) {
                 JOptionPane.showMessageDialog(null, "Driver MySQL tidak ditemukan. Pastikan MySQL Connector/J sudah ditambahkan ke Libraries.", "Error Driver", JOptionPane.ERROR_MESSAGE);
                 conn = null;
@@ -32,7 +32,6 @@ public class connection {
         System.out.println("Memulai uji koneksi...");
         if (getConnection() != null) {
             System.out.println("Koneksi berhasil!");
-            // Secara opsional, tutup koneksi setelah pengujian:
             try {
                 conn.close();
                 System.out.println("Koneksi ditutup.");

@@ -134,10 +134,10 @@ public class signInPage extends javax.swing.JFrame {
             JOptionPane.showMessageDialog(this, "Password harus diisi!", "Peringatan", JOptionPane.WARNING_MESSAGE);
             return;
         }
-        
+
         if (!config.validasiEmail.isValidEmail(emailInput)) {
             JOptionPane.showMessageDialog(this, "Format email tidak valid (contoh: user@domain.com).", "Peringatan", JOptionPane.WARNING_MESSAGE);
-            inputEmail.setText(""); 
+            inputEmail.setText("");
             return;
         }
 
@@ -152,11 +152,17 @@ public class signInPage extends javax.swing.JFrame {
                 if (rs.next()) {
                     String hashedPasswordDB = rs.getString("password");
                     if (hashedInputPassword.equals(hashedPasswordDB)) {
-                        String role = rs.getString("role");
+                        int idUsers = rs.getInt("id_users");
+                        String emailUsers = rs.getString("email");
                         String namaUsers = rs.getString("nama");
+                        String role = rs.getString("role");
                         int statusAccount = rs.getInt("status");
-                        
-                        if(statusAccount == 1) {
+                        String passwordUsers = rs.getString("password");
+                        String genderUsers = rs.getString("gender");
+                        String alamatUsers = rs.getString("alamat");
+
+                        config.userSession.getInstance().login(idUsers, namaUsers, emailUsers, passwordUsers,  genderUsers, alamatUsers, role, statusAccount);
+                        if (statusAccount == 1) {
                             if (role.equals("admin")) {
                                 JOptionPane.showMessageDialog(this, "Selamat datang, " + namaUsers, "Login Berhasil", JOptionPane.INFORMATION_MESSAGE);
                                 admin.dashboardAdmin dashboardAdmin = new admin.dashboardAdmin();
@@ -170,9 +176,13 @@ public class signInPage extends javax.swing.JFrame {
 
                             } else {
                                 JOptionPane.showMessageDialog(this, "Role pengguna tidak valid.", "Error", JOptionPane.ERROR_MESSAGE);
-                            } 
+                                inputEmail.setText("");
+                                inputPassword.setText("");
+                            }
                         } else {
-                           JOptionPane.showMessageDialog(this, "Akun Anda saat ini dinonaktifkan. Silakan hubungi Administrator.", "Login Gagal: Akun Non-aktif", JOptionPane.WARNING_MESSAGE);
+                            JOptionPane.showMessageDialog(this, "Akun Anda saat ini dinonaktifkan. Silakan hubungi Administrator.", "Login Gagal: Akun Non-aktif", JOptionPane.WARNING_MESSAGE);
+                            inputEmail.setText("");
+                            inputPassword.setText("");
                         }
                     } else {
                         JOptionPane.showMessageDialog(this, "Email atau Password salah!", "Login Gagal", JOptionPane.ERROR_MESSAGE);
