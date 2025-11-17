@@ -1,0 +1,14 @@
+name database = sukaadu_pbo
+
+user memiliki dua role yaitu 'admin' dan 'masyarakat'
+
+a. Users admin :
+  - email = admin@gmail.com
+  - password = sukamaju
+
+b. Users masyarakat :
+  - email = igopbo@gmail.com
+  - password = igopbo123
+
+
+Password ini bersifat MD5
