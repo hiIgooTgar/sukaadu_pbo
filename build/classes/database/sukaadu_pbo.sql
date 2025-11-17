@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Nov 17, 2025 at 09:11 AM
+-- Generation Time: Nov 17, 2025 at 03:34 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -53,7 +53,11 @@ CREATE TABLE `kategori_pengaduan` (
 --
 
 INSERT INTO `kategori_pengaduan` (`id_kategori_pengaduan`, `nama_kategori`, `deskripsi`) VALUES
-(1, 'Infrastruktur', 'Infrastruktur');
+(1, 'Infrastruktur dan Utilitas', 'Aduan terkait kerusakan atau masalah pada fasilitas fisik dan layanan dasar publik.'),
+(2, 'Pelayanan Publik', 'Aduan mengenai kualitas, prosedur, atau perilaku petugas dalam memberikan layanan publik.'),
+(3, 'Lingkungan Hidup', 'Aduan yang berkaitan dengan kebersihan, polusi, dan pengelolaan sampah di lingkungan masyarakat.'),
+(4, 'Ketertiban dan Keamanan', 'Aduan mengenai gangguan keamanan, ketertiban umum, dan masalah sosial yang terjadi di wilayah.'),
+(5, 'Kesehatan Publik', 'Aduan terkait fasilitas dan layanan kesehatan yang disediakan oleh pemerintah (puskesmas, rumah sakit).');
 
 -- --------------------------------------------------------
 
@@ -68,7 +72,22 @@ CREATE TABLE `pengaduan` (
   `deskripsi_pengaduan` text DEFAULT NULL,
   `foto_pengaduan` varchar(255) DEFAULT NULL,
   `status` enum('belum','proses','selesai') DEFAULT NULL,
-  `id_kategori_pengaduan` int(11) DEFAULT NULL
+  `id_kategori_pengaduan` int(11) DEFAULT NULL,
+  `id_users` int(11) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `tanggapan`
+--
+
+CREATE TABLE `tanggapan` (
+  `id_tanggapan` int(11) NOT NULL,
+  `id_pengaduan` int(11) DEFAULT NULL,
+  `tgl_tanggapan` date DEFAULT current_timestamp(),
+  `isi_tanggapan` text DEFAULT NULL,
+  `id_users` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -80,7 +99,7 @@ CREATE TABLE `pengaduan` (
 CREATE TABLE `users` (
   `id_users` int(11) NOT NULL,
   `email` varchar(255) DEFAULT NULL,
-  `password` varchar(255) NOT NULL,
+  `password` varchar(255) DEFAULT NULL,
   `nama` varchar(128) DEFAULT NULL,
   `gender` enum('L','P') DEFAULT NULL,
   `alamat` text DEFAULT NULL,
@@ -93,8 +112,9 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`id_users`, `email`, `password`, `nama`, `gender`, `alamat`, `role`, `status`) VALUES
-(1, 'admin@gmail.com', 'c511436155a3738b583e17b5649332a7', 'Admin Sukamaju', NULL, 'Sukamaju', 'admin', 1),
-(2, 'igopbo@gmail.com', '949dddd88a13ae99bb9076ef516e5d16', 'Igo Tegar Prambudhy', NULL, NULL, 'masyarakat', 1);
+(1, 'igopbo@gmail.com', '949dddd88a13ae99bb9076ef516e5d16', 'Igo Tegar Prambudhy', NULL, NULL, 'masyarakat', 1),
+(2, 'zahid@gmail.com', 'd32ec73eb8d6d4c5527287af5eb707d7', 'Zahid', NULL, NULL, 'masyarakat', 1),
+(3, 'admin@gmail.com', 'c511436155a3738b583e17b5649332a7', 'Admin Sukamaju', NULL, NULL, 'admin', 1);
 
 --
 -- Indexes for dumped tables
@@ -118,7 +138,16 @@ ALTER TABLE `kategori_pengaduan`
 --
 ALTER TABLE `pengaduan`
   ADD PRIMARY KEY (`id_pengaduan`),
-  ADD KEY `id_kategori_pengaduan` (`id_kategori_pengaduan`);
+  ADD KEY `id_kategori_pengaduan` (`id_kategori_pengaduan`),
+  ADD KEY `id_users` (`id_users`);
+
+--
+-- Indexes for table `tanggapan`
+--
+ALTER TABLE `tanggapan`
+  ADD PRIMARY KEY (`id_tanggapan`),
+  ADD KEY `id_pengaduan` (`id_pengaduan`),
+  ADD KEY `id_users` (`id_users`);
 
 --
 -- Indexes for table `users`
@@ -141,7 +170,7 @@ ALTER TABLE `berita`
 -- AUTO_INCREMENT for table `kategori_pengaduan`
 --
 ALTER TABLE `kategori_pengaduan`
-  MODIFY `id_kategori_pengaduan` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id_kategori_pengaduan` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT for table `pengaduan`
@@ -150,10 +179,16 @@ ALTER TABLE `pengaduan`
   MODIFY `id_pengaduan` int(11) NOT NULL AUTO_INCREMENT;
 
 --
+-- AUTO_INCREMENT for table `tanggapan`
+--
+ALTER TABLE `tanggapan`
+  MODIFY `id_tanggapan` int(11) NOT NULL AUTO_INCREMENT;
+
+--
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id_users` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id_users` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- Constraints for dumped tables
@@ -169,7 +204,15 @@ ALTER TABLE `berita`
 -- Constraints for table `pengaduan`
 --
 ALTER TABLE `pengaduan`
-  ADD CONSTRAINT `pengaduan_ibfk_1` FOREIGN KEY (`id_kategori_pengaduan`) REFERENCES `kategori_pengaduan` (`id_kategori_pengaduan`);
+  ADD CONSTRAINT `pengaduan_ibfk_1` FOREIGN KEY (`id_kategori_pengaduan`) REFERENCES `kategori_pengaduan` (`id_kategori_pengaduan`),
+  ADD CONSTRAINT `pengaduan_ibfk_2` FOREIGN KEY (`id_users`) REFERENCES `users` (`id_users`);
+
+--
+-- Constraints for table `tanggapan`
+--
+ALTER TABLE `tanggapan`
+  ADD CONSTRAINT `tanggapan_ibfk_1` FOREIGN KEY (`id_pengaduan`) REFERENCES `pengaduan` (`id_pengaduan`),
+  ADD CONSTRAINT `tanggapan_ibfk_2` FOREIGN KEY (`id_users`) REFERENCES `users` (`id_users`);
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

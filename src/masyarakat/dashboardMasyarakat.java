@@ -1,13 +1,18 @@
 package masyarakat;
 
 import admin.*;
+
 import config.userSession;
+import config.sessionValidator;
 
 import javax.swing.JOptionPane;
 
 public class dashboardMasyarakat extends javax.swing.JFrame {
 
     public dashboardMasyarakat() {
+        if (!config.sessionValidator.checkSession(this)) {
+            return;
+        }
         initComponents();
         tampilkanNamaPengguna();
     }
@@ -24,11 +29,12 @@ public class dashboardMasyarakat extends javax.swing.JFrame {
         label_name = new javax.swing.JLabel();
         jPanel2 = new javax.swing.JPanel();
         jLabel2 = new javax.swing.JLabel();
-        jLabel3 = new javax.swing.JLabel();
-        jLabel4 = new javax.swing.JLabel();
-        jLabel5 = new javax.swing.JLabel();
-        jLabel6 = new javax.swing.JLabel();
+        navPengaduan = new javax.swing.JLabel();
+        navBeranda = new javax.swing.JLabel();
+        navBerita = new javax.swing.JLabel();
+        navProfile = new javax.swing.JLabel();
         btn_sign_out = new javax.swing.JButton();
+        navLaporan = new javax.swing.JLabel();
         jLabel7 = new javax.swing.JLabel();
         jLabel8 = new javax.swing.JLabel();
         jLabel10 = new javax.swing.JLabel();
@@ -47,21 +53,21 @@ public class dashboardMasyarakat extends javax.swing.JFrame {
         jLabel2.setForeground(new java.awt.Color(255, 255, 255));
         jLabel2.setText("SukaAdu");
 
-        jLabel3.setFont(new java.awt.Font("Tahoma", 0, 18)); // NOI18N
-        jLabel3.setForeground(new java.awt.Color(255, 255, 255));
-        jLabel3.setText("Pengaduan");
+        navPengaduan.setFont(new java.awt.Font("Tahoma", 0, 18)); // NOI18N
+        navPengaduan.setForeground(new java.awt.Color(255, 255, 255));
+        navPengaduan.setText("Pengaduan");
 
-        jLabel4.setFont(new java.awt.Font("Tahoma", 0, 18)); // NOI18N
-        jLabel4.setForeground(new java.awt.Color(255, 255, 51));
-        jLabel4.setText("Beranda");
+        navBeranda.setFont(new java.awt.Font("Tahoma", 0, 18)); // NOI18N
+        navBeranda.setForeground(new java.awt.Color(255, 255, 51));
+        navBeranda.setText("Beranda");
 
-        jLabel5.setFont(new java.awt.Font("Tahoma", 0, 18)); // NOI18N
-        jLabel5.setForeground(new java.awt.Color(255, 255, 255));
-        jLabel5.setText("Berita");
+        navBerita.setFont(new java.awt.Font("Tahoma", 0, 18)); // NOI18N
+        navBerita.setForeground(new java.awt.Color(255, 255, 255));
+        navBerita.setText("Berita");
 
-        jLabel6.setFont(new java.awt.Font("Tahoma", 0, 18)); // NOI18N
-        jLabel6.setForeground(new java.awt.Color(255, 255, 255));
-        jLabel6.setText("Profile");
+        navProfile.setFont(new java.awt.Font("Tahoma", 0, 18)); // NOI18N
+        navProfile.setForeground(new java.awt.Color(255, 255, 255));
+        navProfile.setText("Profile");
 
         btn_sign_out.setFont(new java.awt.Font("Tahoma", 0, 18)); // NOI18N
         btn_sign_out.setText("Logout");
@@ -71,6 +77,10 @@ public class dashboardMasyarakat extends javax.swing.JFrame {
             }
         });
 
+        navLaporan.setFont(new java.awt.Font("Tahoma", 0, 18)); // NOI18N
+        navLaporan.setForeground(new java.awt.Color(255, 255, 255));
+        navLaporan.setText("Laporan");
+
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
         jPanel2Layout.setHorizontalGroup(
@@ -79,13 +89,15 @@ public class dashboardMasyarakat extends javax.swing.JFrame {
                 .addGap(37, 37, 37)
                 .addComponent(jLabel2)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(jLabel4)
+                .addComponent(navBeranda)
                 .addGap(45, 45, 45)
-                .addComponent(jLabel3)
-                .addGap(42, 42, 42)
-                .addComponent(jLabel5)
+                .addComponent(navPengaduan)
+                .addGap(50, 50, 50)
+                .addComponent(navLaporan)
+                .addGap(49, 49, 49)
+                .addComponent(navBerita)
                 .addGap(39, 39, 39)
-                .addComponent(jLabel6)
+                .addComponent(navProfile)
                 .addGap(31, 31, 31)
                 .addComponent(btn_sign_out)
                 .addGap(49, 49, 49))
@@ -96,24 +108,30 @@ public class dashboardMasyarakat extends javax.swing.JFrame {
                 .addGap(25, 25, 25)
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel2)
-                    .addComponent(jLabel3)
-                    .addComponent(jLabel4)
-                    .addComponent(jLabel5)
-                    .addComponent(jLabel6)
-                    .addComponent(btn_sign_out))
+                    .addComponent(navPengaduan)
+                    .addComponent(navBeranda)
+                    .addComponent(navBerita)
+                    .addComponent(navProfile)
+                    .addComponent(btn_sign_out)
+                    .addComponent(navLaporan))
                 .addContainerGap(24, Short.MAX_VALUE))
         );
 
         jLabel7.setFont(new java.awt.Font("Tahoma", 1, 26)); // NOI18N
         jLabel7.setText("Sistem Pengaduan Masyarakat - SukaAdu");
 
+        jLabel8.setFont(new java.awt.Font("Tahoma", 0, 17)); // NOI18N
         jLabel8.setText("SukaAdu adalah aplikasi pelayanan pengaduan masyarakat yang memudahkan warga melaporkan masalah");
 
+        jLabel10.setFont(new java.awt.Font("Tahoma", 0, 17)); // NOI18N
         jLabel10.setText("lingkungan, administrasi, dan layanan publik secara cepat, terpantau, serta transparan melalui platform");
 
+        jLabel11.setFont(new java.awt.Font("Tahoma", 0, 17)); // NOI18N
         jLabel11.setText("digital yang mudah digunakan.");
 
-        jButton2.setBackground(new java.awt.Color(255, 255, 255));
+        jButton2.setBackground(new java.awt.Color(0, 153, 255));
+        jButton2.setFont(new java.awt.Font("Tahoma", 0, 17)); // NOI18N
+        jButton2.setForeground(new java.awt.Color(255, 255, 255));
         jButton2.setText("Formulir Pengaduan");
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
@@ -130,7 +148,7 @@ public class dashboardMasyarakat extends javax.swing.JFrame {
                     .addComponent(label_name)
                     .addComponent(jLabel11)
                     .addComponent(jButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 230, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(165, Short.MAX_VALUE))
+                .addContainerGap(192, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -146,9 +164,9 @@ public class dashboardMasyarakat extends javax.swing.JFrame {
                 .addComponent(jLabel10)
                 .addGap(1, 1, 1)
                 .addComponent(jLabel11)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(jButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(230, Short.MAX_VALUE))
+                .addGap(18, 18, 18)
+                .addComponent(jButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 43, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(222, Short.MAX_VALUE))
         );
 
         pack();
@@ -187,13 +205,14 @@ public class dashboardMasyarakat extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel11;
     private javax.swing.JLabel jLabel2;
-    private javax.swing.JLabel jLabel3;
-    private javax.swing.JLabel jLabel4;
-    private javax.swing.JLabel jLabel5;
-    private javax.swing.JLabel jLabel6;
     private javax.swing.JLabel jLabel7;
     private javax.swing.JLabel jLabel8;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JLabel label_name;
+    private javax.swing.JLabel navBeranda;
+    private javax.swing.JLabel navBerita;
+    private javax.swing.JLabel navLaporan;
+    private javax.swing.JLabel navPengaduan;
+    private javax.swing.JLabel navProfile;
     // End of variables declaration//GEN-END:variables
 }
