@@ -27,12 +27,12 @@
           <Group type="102" alignment="0" attributes="0">
               <EmptySpace min="-2" pref="81" max="-2" attributes="0"/>
               <Group type="103" groupAlignment="0" attributes="0">
+                  <Component id="btnForm" min="-2" pref="260" max="-2" attributes="0"/>
                   <Component id="jLabel10" min="-2" max="-2" attributes="0"/>
                   <Component id="jLabel8" min="-2" max="-2" attributes="0"/>
                   <Component id="jLabel7" min="-2" max="-2" attributes="0"/>
                   <Component id="label_name" min="-2" max="-2" attributes="0"/>
                   <Component id="jLabel11" min="-2" max="-2" attributes="0"/>
-                  <Component id="jButton2" alignment="0" min="-2" pref="230" max="-2" attributes="0"/>
               </Group>
               <EmptySpace pref="276" max="32767" attributes="0"/>
           </Group>
@@ -53,7 +53,7 @@
               <EmptySpace min="-2" pref="1" max="-2" attributes="0"/>
               <Component id="jLabel11" min="-2" max="-2" attributes="0"/>
               <EmptySpace type="separate" max="-2" attributes="0"/>
-              <Component id="jButton2" min="-2" pref="43" max="-2" attributes="0"/>
+              <Component id="btnForm" min="-2" pref="43" max="-2" attributes="0"/>
               <EmptySpace pref="222" max="32767" attributes="0"/>
           </Group>
       </Group>
@@ -140,6 +140,9 @@
             </Property>
             <Property name="text" type="java.lang.String" value="Pengaduan"/>
           </Properties>
+          <Events>
+            <EventHandler event="mouseClicked" listener="java.awt.event.MouseListener" parameters="java.awt.event.MouseEvent" handler="navPengaduanMouseClicked"/>
+          </Events>
         </Component>
         <Component class="javax.swing.JLabel" name="navBeranda">
           <Properties>
@@ -151,6 +154,9 @@
             </Property>
             <Property name="text" type="java.lang.String" value="Beranda"/>
           </Properties>
+          <Events>
+            <EventHandler event="mouseClicked" listener="java.awt.event.MouseListener" parameters="java.awt.event.MouseEvent" handler="navBerandaMouseClicked"/>
+          </Events>
         </Component>
         <Component class="javax.swing.JLabel" name="navBerita">
           <Properties>
@@ -162,6 +168,9 @@
             </Property>
             <Property name="text" type="java.lang.String" value="Berita"/>
           </Properties>
+          <Events>
+            <EventHandler event="mouseClicked" listener="java.awt.event.MouseListener" parameters="java.awt.event.MouseEvent" handler="navBeritaMouseClicked"/>
+          </Events>
         </Component>
         <Component class="javax.swing.JLabel" name="navProfile">
           <Properties>
@@ -173,6 +182,9 @@
             </Property>
             <Property name="text" type="java.lang.String" value="Profile"/>
           </Properties>
+          <Events>
+            <EventHandler event="mouseClicked" listener="java.awt.event.MouseListener" parameters="java.awt.event.MouseEvent" handler="navProfileMouseClicked"/>
+          </Events>
         </Component>
         <Component class="javax.swing.JButton" name="btn_sign_out">
           <Properties>
@@ -195,6 +207,9 @@
             </Property>
             <Property name="text" type="java.lang.String" value="Laporan"/>
           </Properties>
+          <Events>
+            <EventHandler event="mouseClicked" listener="java.awt.event.MouseListener" parameters="java.awt.event.MouseEvent" handler="navLaporanMouseClicked"/>
+          </Events>
         </Component>
       </SubComponents>
     </Container>
@@ -230,7 +245,7 @@
         <Property name="text" type="java.lang.String" value="digital yang mudah digunakan."/>
       </Properties>
     </Component>
-    <Component class="javax.swing.JButton" name="jButton2">
+    <Component class="javax.swing.JButton" name="btnForm">
       <Properties>
         <Property name="background" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
           <Color blue="ff" green="99" red="0" type="rgb"/>
@@ -243,6 +258,9 @@
         </Property>
         <Property name="text" type="java.lang.String" value="Formulir Pengaduan"/>
       </Properties>
+      <Events>
+        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnFormActionPerformed"/>
+      </Events>
     </Component>
   </SubComponents>
 </Form>

@@ -39,7 +39,7 @@ public class dashboardMasyarakat extends javax.swing.JFrame {
         jLabel8 = new javax.swing.JLabel();
         jLabel10 = new javax.swing.JLabel();
         jLabel11 = new javax.swing.JLabel();
-        jButton2 = new javax.swing.JButton();
+        btnForm = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -56,18 +56,38 @@ public class dashboardMasyarakat extends javax.swing.JFrame {
         navPengaduan.setFont(new java.awt.Font("Tahoma", 0, 18)); // NOI18N
         navPengaduan.setForeground(new java.awt.Color(255, 255, 255));
         navPengaduan.setText("Pengaduan");
+        navPengaduan.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                navPengaduanMouseClicked(evt);
+            }
+        });
 
         navBeranda.setFont(new java.awt.Font("Tahoma", 0, 18)); // NOI18N
         navBeranda.setForeground(new java.awt.Color(255, 255, 51));
         navBeranda.setText("Beranda");
+        navBeranda.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                navBerandaMouseClicked(evt);
+            }
+        });
 
         navBerita.setFont(new java.awt.Font("Tahoma", 0, 18)); // NOI18N
         navBerita.setForeground(new java.awt.Color(255, 255, 255));
         navBerita.setText("Berita");
+        navBerita.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                navBeritaMouseClicked(evt);
+            }
+        });
 
         navProfile.setFont(new java.awt.Font("Tahoma", 0, 18)); // NOI18N
         navProfile.setForeground(new java.awt.Color(255, 255, 255));
         navProfile.setText("Profile");
+        navProfile.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                navProfileMouseClicked(evt);
+            }
+        });
 
         btn_sign_out.setFont(new java.awt.Font("Tahoma", 0, 18)); // NOI18N
         btn_sign_out.setText("Logout");
@@ -80,6 +100,11 @@ public class dashboardMasyarakat extends javax.swing.JFrame {
         navLaporan.setFont(new java.awt.Font("Tahoma", 0, 18)); // NOI18N
         navLaporan.setForeground(new java.awt.Color(255, 255, 255));
         navLaporan.setText("Laporan");
+        navLaporan.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                navLaporanMouseClicked(evt);
+            }
+        });
 
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
@@ -129,10 +154,15 @@ public class dashboardMasyarakat extends javax.swing.JFrame {
         jLabel11.setFont(new java.awt.Font("Tahoma", 0, 17)); // NOI18N
         jLabel11.setText("digital yang mudah digunakan.");
 
-        jButton2.setBackground(new java.awt.Color(0, 153, 255));
-        jButton2.setFont(new java.awt.Font("Tahoma", 0, 17)); // NOI18N
-        jButton2.setForeground(new java.awt.Color(255, 255, 255));
-        jButton2.setText("Formulir Pengaduan");
+        btnForm.setBackground(new java.awt.Color(0, 153, 255));
+        btnForm.setFont(new java.awt.Font("Tahoma", 0, 17)); // NOI18N
+        btnForm.setForeground(new java.awt.Color(255, 255, 255));
+        btnForm.setText("Formulir Pengaduan");
+        btnForm.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnFormActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -142,12 +172,12 @@ public class dashboardMasyarakat extends javax.swing.JFrame {
             .addGroup(layout.createSequentialGroup()
                 .addGap(81, 81, 81)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(btnForm, javax.swing.GroupLayout.PREFERRED_SIZE, 260, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel10)
                     .addComponent(jLabel8)
                     .addComponent(jLabel7)
                     .addComponent(label_name)
-                    .addComponent(jLabel11)
-                    .addComponent(jButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 230, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(jLabel11))
                 .addContainerGap(276, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
@@ -165,7 +195,7 @@ public class dashboardMasyarakat extends javax.swing.JFrame {
                 .addGap(1, 1, 1)
                 .addComponent(jLabel11)
                 .addGap(18, 18, 18)
-                .addComponent(jButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 43, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(btnForm, javax.swing.GroupLayout.PREFERRED_SIZE, 43, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap(222, Short.MAX_VALUE))
         );
 
@@ -191,6 +221,66 @@ public class dashboardMasyarakat extends javax.swing.JFrame {
             }
         }
     }//GEN-LAST:event_btn_sign_outActionPerformed
+
+    private void navPengaduanMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_navPengaduanMouseClicked
+        try {
+            masyarakat.pengaduan.form_pengaduan formMasyarakat = new masyarakat.pengaduan.form_pengaduan();
+            formMasyarakat.setVisible(true);
+            this.dispose();
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "Gagal membuka form pengaduan masyarakat: " + e.getMessage(), "Error Redirect", JOptionPane.ERROR_MESSAGE);
+        }
+    }//GEN-LAST:event_navPengaduanMouseClicked
+
+    private void navLaporanMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_navLaporanMouseClicked
+        try {
+            masyarakat.laporan.form_laporan formLaporanMasyarakat = new masyarakat.laporan.form_laporan();
+            formLaporanMasyarakat.setVisible(true);
+            this.dispose();
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "Gagal membuka form laporan masyarakat: " + e.getMessage(), "Error Redirect", JOptionPane.ERROR_MESSAGE);
+        }
+    }//GEN-LAST:event_navLaporanMouseClicked
+
+    private void navBeritaMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_navBeritaMouseClicked
+        try {
+            masyarakat.berita.form_berita formBeritaMasyarakat = new masyarakat.berita.form_berita();
+            formBeritaMasyarakat.setVisible(true);
+            this.dispose();
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "Gagal membuka form berita masyarakat: " + e.getMessage(), "Error Redirect", JOptionPane.ERROR_MESSAGE);
+        }
+    }//GEN-LAST:event_navBeritaMouseClicked
+
+    private void navProfileMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_navProfileMouseClicked
+        try {
+            masyarakat.profile.form_profile formProfileMasyarakat = new masyarakat.profile.form_profile();
+            formProfileMasyarakat.setVisible(true);
+            this.dispose();
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "Gagal membuka form pengaduan masyarakat: " + e.getMessage(), "Error Redirect", JOptionPane.ERROR_MESSAGE);
+        }
+    }//GEN-LAST:event_navProfileMouseClicked
+
+    private void navBerandaMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_navBerandaMouseClicked
+        try {
+            masyarakat.dashboardMasyarakat dashboardMasyarakat = new masyarakat.dashboardMasyarakat();
+            dashboardMasyarakat.setVisible(true);
+            this.dispose();
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "Gagal membuka dashboard masyarakat: " + e.getMessage(), "Error Redirect", JOptionPane.ERROR_MESSAGE);
+        }
+    }//GEN-LAST:event_navBerandaMouseClicked
+
+    private void btnFormActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnFormActionPerformed
+        try {
+            masyarakat.pengaduan.form_pengaduan formMasyarakat = new masyarakat.pengaduan.form_pengaduan();
+            formMasyarakat.setVisible(true);
+            this.dispose();
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "Gagal membuka form pengaduan masyarakat: " + e.getMessage(), "Error Redirect", JOptionPane.ERROR_MESSAGE);
+        }
+    }//GEN-LAST:event_btnFormActionPerformed
     public static void main(String args[]) {
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
@@ -200,8 +290,8 @@ public class dashboardMasyarakat extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton btnForm;
     private javax.swing.JButton btn_sign_out;
-    private javax.swing.JButton jButton2;
     private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel11;
     private javax.swing.JLabel jLabel2;
