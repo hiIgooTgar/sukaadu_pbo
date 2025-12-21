@@ -106,8 +106,6 @@ public class form_kategori extends javax.swing.JFrame {
         jScrollPane1 = new javax.swing.JScrollPane();
         tabelKategoriPengaduan = new javax.swing.JTable();
         jLabel2 = new javax.swing.JLabel();
-        jScrollPane2 = new javax.swing.JScrollPane();
-        textAreaDeskripsi = new javax.swing.JTextArea();
         btnDelete = new javax.swing.JButton();
         btnAdd = new javax.swing.JButton();
         btnUpdate = new javax.swing.JButton();
@@ -125,17 +123,17 @@ public class form_kategori extends javax.swing.JFrame {
         navUsers = new javax.swing.JLabel();
         navKategori = new javax.swing.JLabel();
         navLaporan = new javax.swing.JLabel();
+        jScrollPane3 = new javax.swing.JScrollPane();
+        textAreaDeskripsi = new javax.swing.JTextArea();
+        jLabel3 = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
         jLabel1.setFont(new java.awt.Font("Tahoma", 0, 17)); // NOI18N
         jLabel1.setText("Nama Kategori");
 
-        inputNamaKategori.setFont(new java.awt.Font("Tahoma", 0, 17)); // NOI18N
-
         jScrollPane1.setFont(new java.awt.Font("Tahoma", 0, 17)); // NOI18N
 
-        tabelKategoriPengaduan.setFont(new java.awt.Font("Tahoma", 0, 17)); // NOI18N
         tabelKategoriPengaduan.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
                 {null, null, null},
@@ -161,20 +159,12 @@ public class form_kategori extends javax.swing.JFrame {
             }
         });
         jScrollPane1.setViewportView(tabelKategoriPengaduan);
-        if (tabelKategoriPengaduan.getColumnModel().getColumnCount() > 0) {
-            tabelKategoriPengaduan.getColumnModel().getColumn(0).setResizable(false);
-            tabelKategoriPengaduan.getColumnModel().getColumn(1).setResizable(false);
-            tabelKategoriPengaduan.getColumnModel().getColumn(2).setResizable(false);
-        }
 
         jLabel2.setFont(new java.awt.Font("Tahoma", 0, 17)); // NOI18N
         jLabel2.setText("Deskripsi Kategori");
 
-        textAreaDeskripsi.setColumns(20);
-        textAreaDeskripsi.setFont(new java.awt.Font("Tahoma", 0, 17)); // NOI18N
-        textAreaDeskripsi.setRows(5);
-        jScrollPane2.setViewportView(textAreaDeskripsi);
-
+        btnDelete.setBackground(new java.awt.Color(0, 153, 255));
+        btnDelete.setForeground(new java.awt.Color(255, 255, 255));
         btnDelete.setText("Hapus");
         btnDelete.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -182,6 +172,8 @@ public class form_kategori extends javax.swing.JFrame {
             }
         });
 
+        btnAdd.setBackground(new java.awt.Color(0, 153, 255));
+        btnAdd.setForeground(new java.awt.Color(255, 255, 255));
         btnAdd.setText("Tambah");
         btnAdd.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -189,6 +181,8 @@ public class form_kategori extends javax.swing.JFrame {
             }
         });
 
+        btnUpdate.setBackground(new java.awt.Color(0, 153, 255));
+        btnUpdate.setForeground(new java.awt.Color(255, 255, 255));
         btnUpdate.setText("Ubah");
         btnUpdate.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -196,6 +190,8 @@ public class form_kategori extends javax.swing.JFrame {
             }
         });
 
+        btnClear.setBackground(new java.awt.Color(0, 153, 255));
+        btnClear.setForeground(new java.awt.Color(255, 255, 255));
         btnClear.setText("Clear");
         btnClear.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -227,7 +223,7 @@ public class form_kategori extends javax.swing.JFrame {
             .addGroup(jPanel2Layout.createSequentialGroup()
                 .addGap(37, 37, 37)
                 .addComponent(jLabel4)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 1008, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 1012, Short.MAX_VALUE)
                 .addComponent(navProfile)
                 .addGap(46, 46, 46))
         );
@@ -241,13 +237,13 @@ public class form_kategori extends javax.swing.JFrame {
                 .addContainerGap(27, Short.MAX_VALUE))
         );
 
-        jLabel8.setFont(new java.awt.Font("Tahoma", 1, 18)); // NOI18N
+        jLabel8.setFont(new java.awt.Font("Tahoma", 1, 19)); // NOI18N
         jLabel8.setText("Data Kategori Pengaduan");
 
         jPanel1.setBackground(new java.awt.Color(0, 153, 255));
 
         navDashboard.setFont(new java.awt.Font("Tahoma", 0, 18)); // NOI18N
-        navDashboard.setForeground(new java.awt.Color(255, 255, 51));
+        navDashboard.setForeground(new java.awt.Color(255, 255, 255));
         navDashboard.setText("Dashboard");
         navDashboard.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
@@ -274,9 +270,14 @@ public class form_kategori extends javax.swing.JFrame {
         navUsers.setFont(new java.awt.Font("Tahoma", 0, 18)); // NOI18N
         navUsers.setForeground(new java.awt.Color(255, 255, 255));
         navUsers.setText("Data Users");
+        navUsers.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                navUsersMouseClicked(evt);
+            }
+        });
 
         navKategori.setFont(new java.awt.Font("Tahoma", 0, 18)); // NOI18N
-        navKategori.setForeground(new java.awt.Color(255, 255, 255));
+        navKategori.setForeground(new java.awt.Color(255, 255, 51));
         navKategori.setText("Data Kategori");
         navKategori.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
@@ -324,6 +325,13 @@ public class form_kategori extends javax.swing.JFrame {
                 .addContainerGap(301, Short.MAX_VALUE))
         );
 
+        textAreaDeskripsi.setColumns(20);
+        textAreaDeskripsi.setFont(new java.awt.Font("Tahoma", 0, 16)); // NOI18N
+        textAreaDeskripsi.setRows(5);
+        jScrollPane3.setViewportView(textAreaDeskripsi);
+
+        jLabel3.setText("Aplikasi Layanan Pengaduan Masyakarakat Desa SukaMaju - SukaAdu");
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -337,7 +345,6 @@ public class form_kategori extends javax.swing.JFrame {
                             .addComponent(jLabel1)
                             .addComponent(jLabel2)
                             .addComponent(inputNamaKategori)
-                            .addComponent(jScrollPane2)
                             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                                 .addComponent(btnAdd, javax.swing.GroupLayout.PREFERRED_SIZE, 148, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 26, Short.MAX_VALUE)
@@ -345,14 +352,16 @@ public class form_kategori extends javax.swing.JFrame {
                             .addGroup(layout.createSequentialGroup()
                                 .addComponent(btnDelete, javax.swing.GroupLayout.PREFERRED_SIZE, 148, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .addComponent(btnClear, javax.swing.GroupLayout.PREFERRED_SIZE, 137, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                                .addComponent(btnClear, javax.swing.GroupLayout.PREFERRED_SIZE, 137, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addComponent(jScrollPane3))
                         .addGap(39, 39, 39)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(layout.createSequentialGroup()
                                 .addGap(319, 319, 319)
                                 .addComponent(inputSearching, javax.swing.GroupLayout.PREFERRED_SIZE, 273, javax.swing.GroupLayout.PREFERRED_SIZE))
                             .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 592, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                    .addComponent(jLabel8))
+                    .addComponent(jLabel8)
+                    .addComponent(jLabel3))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
             .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
@@ -365,9 +374,11 @@ public class form_kategori extends javax.swing.JFrame {
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(layout.createSequentialGroup()
-                        .addGap(51, 51, 51)
+                        .addGap(44, 44, 44)
                         .addComponent(jLabel8)
-                        .addGap(38, 38, 38)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jLabel3)
+                        .addGap(16, 16, 16)
                         .addComponent(inputSearching, javax.swing.GroupLayout.PREFERRED_SIZE, 39, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(26, 26, 26)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -377,9 +388,9 @@ public class form_kategori extends javax.swing.JFrame {
                                 .addComponent(inputNamaKategori, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addGap(18, 18, 18)
                                 .addComponent(jLabel2)
-                                .addGap(18, 18, 18)
-                                .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 174, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGap(32, 32, 32)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 188, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(27, 27, 27)
                                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                                     .addComponent(btnAdd, javax.swing.GroupLayout.PREFERRED_SIZE, 38, javax.swing.GroupLayout.PREFERRED_SIZE)
                                     .addComponent(btnUpdate, javax.swing.GroupLayout.PREFERRED_SIZE, 38, javax.swing.GroupLayout.PREFERRED_SIZE))
@@ -565,6 +576,16 @@ public class form_kategori extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_navKategoriMouseClicked
 
+    private void navUsersMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_navUsersMouseClicked
+        try {
+            admin.users.form_users usersForm = new admin.users.form_users();
+            usersForm.setVisible(true);
+            this.dispose();
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "Gagal membuka form users: " + e.getMessage(), "Error Redirect", JOptionPane.ERROR_MESSAGE);
+        }
+    }//GEN-LAST:event_navUsersMouseClicked
+
     public static void main(String args[]) {
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
@@ -583,12 +604,13 @@ public class form_kategori extends javax.swing.JFrame {
     private javax.swing.JTextField inputSearching;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
+    private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel8;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JScrollPane jScrollPane2;
+    private javax.swing.JScrollPane jScrollPane3;
     private javax.swing.JLabel navBerita;
     private javax.swing.JLabel navDashboard;
     private javax.swing.JLabel navKategori;

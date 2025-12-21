@@ -194,6 +194,11 @@ public class dashboardAdmin extends javax.swing.JFrame {
         navUsers.setFont(new java.awt.Font("Tahoma", 0, 18)); // NOI18N
         navUsers.setForeground(new java.awt.Color(255, 255, 255));
         navUsers.setText("Data Users");
+        navUsers.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                navUsersMouseClicked(evt);
+            }
+        });
 
         navKategori.setFont(new java.awt.Font("Tahoma", 0, 18)); // NOI18N
         navKategori.setForeground(new java.awt.Color(255, 255, 255));
@@ -424,8 +429,7 @@ public class dashboardAdmin extends javax.swing.JFrame {
                         .addGap(0, 0, Short.MAX_VALUE))
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(0, 0, 0))))
+                        .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))))
         );
 
         pack();
@@ -470,6 +474,16 @@ public class dashboardAdmin extends javax.swing.JFrame {
             JOptionPane.showMessageDialog(this, "Gagal membuka form kategori pengaduan: " + e.getMessage(), "Error Redirect", JOptionPane.ERROR_MESSAGE);
         }
     }//GEN-LAST:event_navKategoriMouseClicked
+
+    private void navUsersMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_navUsersMouseClicked
+        try {
+            admin.users.form_users usersForm = new admin.users.form_users();
+            usersForm.setVisible(true);
+            this.dispose();
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "Gagal membuka form users: " + e.getMessage(), "Error Redirect", JOptionPane.ERROR_MESSAGE);
+        }
+    }//GEN-LAST:event_navUsersMouseClicked
     public static void main(String args[]) {
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {

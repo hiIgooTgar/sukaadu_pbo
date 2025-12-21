@@ -208,14 +208,22 @@ public class signInPage extends javax.swing.JFrame {
                     if (hashedInputPassword.equals(hashedPasswordDB)) {
                         int idUsers = rs.getInt("id_users");
                         String emailUsers = rs.getString("email");
+                        String passwordUsers = rs.getString("password");
+                        String nikUsers = rs.getString("nik");
                         String namaUsers = rs.getString("nama");
+                        String tempatLahirUsers = rs.getString("tempat_lahir");
+                        Date tanggalLahirUsers = rs.getDate("tanggal_lahir");
+                        String agamaUsers = rs.getString("agama");
+                        String jenisKelaminUsers = rs.getString("jenis_kelamin");
+                        String rtUsers = rs.getString("rt");
+                        String rwUsers = rs.getString("rw");
+                        String pekerjaanUsers = rs.getString("pekerjaan");
+                        String pernikahaanUsers = rs.getString("pernikahan");
                         String role = rs.getString("role");
                         int statusAccount = rs.getInt("status");
-                        String passwordUsers = rs.getString("password");
-                        String genderUsers = rs.getString("gender");
-                        String alamatUsers = rs.getString("alamat");
 
-                        config.userSession.getInstance().login(idUsers, namaUsers, emailUsers, passwordUsers,  genderUsers, alamatUsers, role, statusAccount);
+                        config.userSession.getInstance().login(idUsers, emailUsers, passwordUsers, nikUsers, namaUsers, tempatLahirUsers, 
+                                tanggalLahirUsers, agamaUsers, jenisKelaminUsers, rtUsers, rwUsers, pekerjaanUsers, pernikahaanUsers, role, statusAccount);
                         
                         if (statusAccount == 1) {
                             if (role.equalsIgnoreCase("admin")) { 
