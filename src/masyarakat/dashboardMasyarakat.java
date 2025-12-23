@@ -234,7 +234,7 @@ public class dashboardMasyarakat extends javax.swing.JFrame {
 
     private void navLaporanMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_navLaporanMouseClicked
         try {
-            masyarakat.laporan.form_laporan formLaporanMasyarakat = new masyarakat.laporan.form_laporan();
+            masyarakat.berita.form_berita formLaporanMasyarakat = new masyarakat.berita.form_berita();
             formLaporanMasyarakat.setVisible(true);
             this.dispose();
         } catch (Exception e) {

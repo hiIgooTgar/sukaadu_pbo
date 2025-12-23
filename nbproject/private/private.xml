@@ -2,6 +2,19 @@
 <project-private xmlns="http://www.netbeans.org/ns/project-private/1">
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
-        <group/>
+        <group>
+            <file>file:/C:/Users/MyBook%20Z%20Series/Documents/NetBeansProjects/sukaadu_pbo/src/config/userSession.java</file>
+            <file>file:/C:/Users/MyBook%20Z%20Series/Documents/NetBeansProjects/sukaadu_pbo/src/admin/dashboardAdmin.java</file>
+            <file>file:/C:/Users/MyBook%20Z%20Series/Documents/NetBeansProjects/sukaadu_pbo/src/masyarakat/profile/form_profile.java</file>
+            <file>file:/C:/Users/MyBook%20Z%20Series/Documents/NetBeansProjects/sukaadu_pbo/src/config/connection.java</file>
+            <file>file:/C:/Users/MyBook%20Z%20Series/Documents/NetBeansProjects/sukaadu_pbo/src/masyarakat/pengaduan/kategoriPengaduan.java</file>
+            <file>file:/C:/Users/MyBook%20Z%20Series/Documents/NetBeansProjects/sukaadu_pbo/src/masyarakat/pengaduan/form_pengaduan.java</file>
+            <file>file:/C:/Users/MyBook%20Z%20Series/Documents/NetBeansProjects/sukaadu_pbo/src/config/validasiEmail.java</file>
+            <file>file:/C:/Users/MyBook%20Z%20Series/Documents/NetBeansProjects/sukaadu_pbo/src/admin/kategori_pengaduan/form_kategori.java</file>
+            <file>file:/C:/Users/MyBook%20Z%20Series/Documents/NetBeansProjects/sukaadu_pbo/src/auth/signUpPage.java</file>
+            <file>file:/C:/Users/MyBook%20Z%20Series/Documents/NetBeansProjects/sukaadu_pbo/src/auth/signInPage.java</file>
+            <file>file:/C:/Users/MyBook%20Z%20Series/Documents/NetBeansProjects/sukaadu_pbo/src/masyarakat/berita/form_berita.java</file>
+            <file>file:/C:/Users/MyBook%20Z%20Series/Documents/NetBeansProjects/sukaadu_pbo/src/admin/users/form_users.java</file>
+        </group>
     </open-files>
 </project-private>

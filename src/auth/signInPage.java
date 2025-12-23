@@ -9,11 +9,20 @@ import javax.swing.JOptionPane;
 import admin.dashboardAdmin;
 import masyarakat.dashboardMasyarakat;
 import auth.signUpPage;
+import java.awt.Color;
+import javax.swing.BorderFactory;
+import javax.swing.JTextField;
+import javax.swing.UIManager;
+import javax.swing.border.Border;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 
 public class signInPage extends javax.swing.JFrame {
 
     public signInPage() {
         initComponents();
+        setup(inputEmail);
+        setup(inputPassword);
     }
 
     @SuppressWarnings("unchecked")
@@ -173,6 +182,37 @@ public class signInPage extends javax.swing.JFrame {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
+    
+    private void setup(JTextField field){ 
+        
+        field.getDocument().addDocumentListener(new DocumentListener(){ 
+                                                                        
+         @Override
+            public void insertUpdate(DocumentEvent e){
+            update(field);
+            } 
+            @Override
+            public void removeUpdate(DocumentEvent e){
+            update(field);
+            }
+            @Override
+            public void changedUpdate(DocumentEvent e){
+            update(field);
+            }
+            });
+        };
+            public void update(JTextField field){
+            Border rah = UIManager.getBorder("TextField.border");
+            Border hm = BorderFactory.createEmptyBorder(5, 10, 5, 10);
+            Border wow = BorderFactory.createLineBorder(Color.red, 2);
+                if (field.getText().isBlank()){ //imagine the horrors if i type txtNama,txtmerk end the rest instead of combining them as field (you would have to copy paste this if else and change the field w the corresponding field)
+            field.setBorder(BorderFactory.createCompoundBorder(wow,hm)); 
+            
+            } else {
+            field.setBorder(BorderFactory.createCompoundBorder(rah,hm));
+            }
+            }
+    
     private void btnSignInActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSignInActionPerformed
         String emailInput = inputEmail.getText();
         String passwordInput = new String(inputPassword.getPassword());

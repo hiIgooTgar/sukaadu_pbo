@@ -29,9 +29,9 @@ public class form_pengaduan extends javax.swing.JFrame {
     private javax.swing.JLabel labelFoto;
 
     public form_pengaduan() {
-        if (!config.sessionValidator.checkSession(this)) {
-            return;
-        }
+       // if (!config.sessionValidator.checkSession(this)) {
+            //return;
+        //}
         initComponents();
         tampilKategori();
     }
@@ -447,7 +447,7 @@ public class form_pengaduan extends javax.swing.JFrame {
 
     private void navLaporanMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_navLaporanMouseClicked
         try {
-            masyarakat.laporan.form_laporan formLaporanMasyarakat = new masyarakat.laporan.form_laporan();
+            masyarakat.berita.form_berita formLaporanMasyarakat = new masyarakat.berita.form_berita();
             formLaporanMasyarakat.setVisible(true);
             this.dispose();
         } catch (Exception e) {
