@@ -291,6 +291,9 @@
             </Property>
             <Property name="text" type="java.lang.String" value="Profile"/>
           </Properties>
+          <Events>
+            <EventHandler event="mouseClicked" listener="java.awt.event.MouseListener" parameters="java.awt.event.MouseEvent" handler="navProfileMouseClicked"/>
+          </Events>
         </Component>
       </SubComponents>
     </Container>
@@ -374,6 +377,9 @@
             </Property>
             <Property name="text" type="java.lang.String" value="Pengaduan"/>
           </Properties>
+          <Events>
+            <EventHandler event="mouseClicked" listener="java.awt.event.MouseListener" parameters="java.awt.event.MouseEvent" handler="navPengaduanMouseClicked"/>
+          </Events>
         </Component>
         <Component class="javax.swing.JLabel" name="navBerita">
           <Properties>
@@ -385,6 +391,9 @@
             </Property>
             <Property name="text" type="java.lang.String" value="Data Berita"/>
           </Properties>
+          <Events>
+            <EventHandler event="mouseClicked" listener="java.awt.event.MouseListener" parameters="java.awt.event.MouseEvent" handler="navBeritaMouseClicked"/>
+          </Events>
         </Component>
         <Component class="javax.swing.JButton" name="btn_sign_out">
           <Properties>
@@ -435,6 +444,9 @@
             </Property>
             <Property name="text" type="java.lang.String" value="Rekap Laporan"/>
           </Properties>
+          <Events>
+            <EventHandler event="mouseClicked" listener="java.awt.event.MouseListener" parameters="java.awt.event.MouseEvent" handler="navLaporanMouseClicked"/>
+          </Events>
         </Component>
       </SubComponents>
     </Container>

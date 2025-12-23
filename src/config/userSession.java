@@ -19,6 +19,7 @@ public class userSession {
     private String pernikahan;
     private String role;
     private int status;
+    private String img_profile;
 
     private userSession() {
         this.id_users = 0;
@@ -36,6 +37,7 @@ public class userSession {
         this.pernikahan = null;
         this.role = null;
         this.status = 0;
+        this.img_profile = null;
     }
 
     public static userSession getInstance() {
@@ -46,7 +48,7 @@ public class userSession {
     }
 
     public void login(int id_users, String email, String password, String nik, String nama, String tempatLahir, Date tanggalLahir,
-            String agama, String jenisKelamin, String rt, String rw, String pekerjaan, String pernikahan, String role, int status) {
+            String agama, String jenisKelamin, String rt, String rw, String pekerjaan, String pernikahan, String role, int status, String imgProfile) {
         this.id_users = id_users;
         this.email = email;
         this.password = password;
@@ -62,6 +64,7 @@ public class userSession {
         this.pernikahan = pernikahan;
         this.role = role;
         this.status = status;
+        this.img_profile = imgProfile;
     }
 
     public void logout() {
@@ -81,6 +84,7 @@ public class userSession {
         this.pernikahan = null;
         this.role = null;
         this.status = 0;
+        this.img_profile = null;
     }
 
     public int getIdUsers() {
@@ -142,9 +146,13 @@ public class userSession {
     public int getStatus() {
         return status;
     }
+    
+    public String getImgProfile() {
+        return img_profile;
+    }
 
     public void login(int idUsers, String namaUsers, String emailUsers, String passwordUsers, String nikUsers, String role, int statusAccount) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 
     public void login(int idUsers, String emailUsers, String passwordUsers, String nikUsers, String namaUsers, String tempatLahirUsers, String role, int statusAccount) {

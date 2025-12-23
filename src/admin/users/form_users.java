@@ -16,11 +16,9 @@ import javax.swing.table.DefaultTableModel;
 public class form_users extends javax.swing.JFrame {
 
     public form_users() {
-        /*
         if (!config.sessionValidator.checkSession(this)) {
             return;
         }
-         */
 
         initComponents();
         load_table();
@@ -305,6 +303,11 @@ public class form_users extends javax.swing.JFrame {
         navProfile.setFont(new java.awt.Font("Tahoma", 0, 18)); // NOI18N
         navProfile.setForeground(new java.awt.Color(255, 255, 255));
         navProfile.setText("Profile");
+        navProfile.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                navProfileMouseClicked(evt);
+            }
+        });
 
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
@@ -341,10 +344,20 @@ public class form_users extends javax.swing.JFrame {
         navPengaduan.setFont(new java.awt.Font("Tahoma", 0, 18)); // NOI18N
         navPengaduan.setForeground(new java.awt.Color(255, 255, 255));
         navPengaduan.setText("Pengaduan");
+        navPengaduan.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                navPengaduanMouseClicked(evt);
+            }
+        });
 
         navBerita.setFont(new java.awt.Font("Tahoma", 0, 18)); // NOI18N
         navBerita.setForeground(new java.awt.Color(255, 255, 255));
         navBerita.setText("Data Berita");
+        navBerita.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                navBeritaMouseClicked(evt);
+            }
+        });
 
         btn_sign_out.setFont(new java.awt.Font("Tahoma", 0, 18)); // NOI18N
         btn_sign_out.setText("Logout");
@@ -375,6 +388,11 @@ public class form_users extends javax.swing.JFrame {
         navLaporan.setFont(new java.awt.Font("Tahoma", 0, 18)); // NOI18N
         navLaporan.setForeground(new java.awt.Color(255, 255, 255));
         navLaporan.setText("Rekap Laporan");
+        navLaporan.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                navLaporanMouseClicked(evt);
+            }
+        });
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
@@ -652,7 +670,7 @@ public class form_users extends javax.swing.JFrame {
             inputPassword.setText("");
             return;
         }
-        
+
         if (nikInput.length() == 16) {
             JOptionPane.showMessageDialog(this, "NIK harus memiliki minimal 16 karakter!", "Peringatan", JOptionPane.WARNING_MESSAGE);
             inputPassword.setText("");
@@ -900,6 +918,46 @@ public class form_users extends javax.swing.JFrame {
             JOptionPane.showMessageDialog(this, "Gagal membuka form users: " + e.getMessage(), "Error Redirect", JOptionPane.ERROR_MESSAGE);
         }
     }//GEN-LAST:event_navUsersMouseClicked
+
+    private void navProfileMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_navProfileMouseClicked
+        try {
+            admin.profile.form_profile profileForm = new admin.profile.form_profile();
+            profileForm.setVisible(true);
+            this.dispose();
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "Gagal membuka form profile : " + e.getMessage(), "Error Redirect", JOptionPane.ERROR_MESSAGE);
+        }
+    }//GEN-LAST:event_navProfileMouseClicked
+
+    private void navPengaduanMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_navPengaduanMouseClicked
+        try {
+            admin.pengaduan.form_pengaduan_data pengaduanForm = new admin.pengaduan.form_pengaduan_data();
+            pengaduanForm.setVisible(true);
+            this.dispose();
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "Gagal membuka form data pengaduan : " + e.getMessage(), "Error Redirect", JOptionPane.ERROR_MESSAGE);
+        }
+    }//GEN-LAST:event_navPengaduanMouseClicked
+
+    private void navBeritaMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_navBeritaMouseClicked
+        try {
+            admin.berita.form_berita beritaForm = new admin.berita.form_berita();
+            beritaForm.setVisible(true);
+            this.dispose();
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "Gagal membuka form berita : " + e.getMessage(), "Error Redirect", JOptionPane.ERROR_MESSAGE);
+        }
+    }//GEN-LAST:event_navBeritaMouseClicked
+
+    private void navLaporanMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_navLaporanMouseClicked
+        try {
+            admin.rekap_laporan.form_rekap_laporan rekapLaporanForm = new  admin.rekap_laporan.form_rekap_laporan();
+            rekapLaporanForm.setVisible(true);
+            this.dispose();
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "Gagal membuka form rekap laporan : " + e.getMessage(), "Error Redirect", JOptionPane.ERROR_MESSAGE);
+        }
+    }//GEN-LAST:event_navLaporanMouseClicked
 
     public static void main(String args[]) {
         java.awt.EventQueue.invokeLater(new Runnable() {

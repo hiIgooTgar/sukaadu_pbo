@@ -7,6 +7,7 @@ import config.userSession;
 import config.sessionValidator;
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.Font;
 
 import javax.swing.ImageIcon;
@@ -19,6 +20,7 @@ import java.sql.Statement;
 import javax.swing.JLabel;
 
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
@@ -59,7 +61,7 @@ public class form_laporan extends javax.swing.JFrame {
                     + "k.nama_kategori, p.foto_pengaduan, p.status "
                     + "FROM pengaduan p "
                     + "JOIN kategori_pengaduan k ON p.id_kategori_pengaduan = k.id_kategori_pengaduan "
-                    + "WHERE p.id_users = ? ORDER BY p.tgl_pegaduan DESC";
+                    + "WHERE p.id_users = ? ORDER BY p.id_pengaduan DESC";
             PreparedStatement ps = conn.prepareStatement(sql);
             ps.setInt(1, idUsers);
             ResultSet rs = ps.executeQuery();
@@ -117,7 +119,7 @@ public class form_laporan extends javax.swing.JFrame {
                     + "FROM pengaduan p "
                     + "JOIN kategori_pengaduan k ON p.id_kategori_pengaduan = k.id_kategori_pengaduan "
                     + "WHERE p.id_users = ? AND p.judul_pengaduan LIKE ? "
-                    + "ORDER BY p.tgl_pegaduan DESC";
+                    + "ORDER BY p.id_pengaduan DESC";
             PreparedStatement ps = conn.prepareStatement(sql);
             ps.setInt(1, idUsers);
             ps.setString(2, "%" + keyword + "%");
@@ -126,7 +128,7 @@ public class form_laporan extends javax.swing.JFrame {
             while (rs.next()) {
                 model.addRow(new Object[]{
                     no++,
-                    rs.getString("id_pengaduan"), // Index 1
+                    rs.getString("id_pengaduan"),
                     rs.getString("tgl_pegaduan"),
                     rs.getString("judul_pengaduan"),
                     rs.getString("deskripsi_pengaduan"),
@@ -155,7 +157,7 @@ public class form_laporan extends javax.swing.JFrame {
             public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
                 JLabel label = new JLabel();
                 if (value != null) {
-                    String path = "src/uploads/" + value.toString();
+                    String path = "src/uploads/pengaduan/" + value.toString();
                     File file = new File(path);
                     if (file.exists()) {
                         ImageIcon imgIcon = new ImageIcon(path);
@@ -185,6 +187,9 @@ public class form_laporan extends javax.swing.JFrame {
                     } else if ("selesai".equalsIgnoreCase(status)) {
                         c.setBackground(Color.GREEN);
                         c.setForeground(Color.BLACK);
+                    } else if ("belum".equalsIgnoreCase(status)) {
+                        c.setBackground(Color.RED);
+                        c.setForeground(Color.WHITE);
                     } else {
                         c.setBackground(Color.WHITE);
                         c.setForeground(Color.BLACK);
@@ -202,20 +207,46 @@ public class form_laporan extends javax.swing.JFrame {
         tabelLaporanMasyarakat.getColumnModel().getColumn(8).setCellRenderer(new DefaultTableCellRenderer() {
             @Override
             public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
-                Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
-                String status = table.getValueAt(row, 7).toString(); // Cek kolom status
+                JPanel panel = new JPanel(new java.awt.GridBagLayout());
+                panel.setOpaque(true);
+                panel.setBorder(javax.swing.BorderFactory.createEmptyBorder(5, 15, 5, 15));
 
-                if ("selesai".equalsIgnoreCase(status)) {
-                    setText("Lihat Tanggapan");
-                    setForeground(Color.BLACK);
-                    setFont(getFont().deriveFont(Font.BOLD));
-                } else {
-                    setText("Tidak Ada Tanggapan"); // Kosongkan jika belum selesai
-                    setForeground(Color.BLACK);
-                    setFont(getFont().deriveFont(Font.BOLD));
+                JLabel btn = new JLabel();
+                btn.setOpaque(true);
+                btn.setHorizontalAlignment(JLabel.CENTER);
+                btn.setFont(new Font("Tahoma", Font.PLAIN, 12));
+
+                btn.setPreferredSize(new Dimension(130, 30));
+                btn.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED));
+
+                String status = table.getValueAt(row, 7).toString().toLowerCase();
+
+                if (status.equals("belum")) {
+                    btn.setText("Hapus Pengaduan");
+                    btn.setBackground(new Color(255, 51, 51));
+                    btn.setForeground(Color.WHITE);
+                } else if (status.equals("proses")) {
+                    btn.setText("Belum Ada Tanggapan");
+                    btn.setBackground(new Color(255, 204, 0));
+                    btn.setForeground(Color.BLACK);
+                } else if (status.equals("selesai")) {
+                    btn.setText("Lihat Tanggapan");
+                    btn.setBackground(new Color(40, 167, 69));
+                    btn.setForeground(Color.WHITE);
+                } else if (status.equals("tolak")) {
+                   btn.setText("Hapus Pengaduan");
+                   btn.setBackground(new Color(255, 51, 51));
+                    btn.setForeground(Color.WHITE);
                 }
-                setHorizontalAlignment(JLabel.CENTER);
-                return c;
+
+                if (isSelected) {
+                    panel.setBackground(table.getSelectionBackground());
+                } else {
+                    panel.setBackground(Color.WHITE);
+                }
+
+                panel.add(btn);
+                return panel;
             }
         });
     }
@@ -228,17 +259,45 @@ public class form_laporan extends javax.swing.JFrame {
                 int col = tabelLaporanMasyarakat.getSelectedColumn();
 
                 if (col == 8) {
-                    String status = tabelLaporanMasyarakat.getValueAt(row, 7).toString();
+                    String status = tabelLaporanMasyarakat.getValueAt(row, 7).toString().toLowerCase();
+                    String idPengaduan = tabelLaporanMasyarakat.getValueAt(row, 1).toString();
 
-                    if ("selesai".equalsIgnoreCase(status)) {
-                        String idPengaduan = tabelLaporanMasyarakat.getValueAt(row, 1).toString();
+                    if (status.equals("belum") || status.equals("tolak")) {
+                        int confirm = JOptionPane.showConfirmDialog(null,
+                                "Apakah Anda yakin ingin menghapus pengaduan ini?",
+                                "Konfirmasi Hapus",
+                                JOptionPane.YES_NO_OPTION,
+                                JOptionPane.WARNING_MESSAGE);
+
+                        if (confirm == JOptionPane.YES_OPTION) {
+                            prosesHapus(idPengaduan);
+                        }
+
+                    } else if (status.equals("proses")) {
+                        JOptionPane.showMessageDialog(null, "Laporan Anda sedang diproses oleh petugas. Mohon ditunggu.");
+                    } else if (status.equals("selesai")) {
                         tampilkanPopupTanggapan(idPengaduan);
-                    } else {
-                        JOptionPane.showMessageDialog(null, "Laporan masih dalam " + status);
                     }
                 }
             }
         });
+    }
+
+    private void prosesHapus(String id) {
+        try {
+            Connection conn = config.connection.getConnection();
+            String sql = "DELETE FROM pengaduan WHERE id_pengaduan = ?";
+            PreparedStatement ps = conn.prepareStatement(sql);
+            ps.setString(1, id);
+
+            int execution = ps.executeUpdate();
+            if (execution > 0) {
+                JOptionPane.showMessageDialog(this, "Pengaduan berhasil dihapus.");
+                tampilLaporan();
+            }
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "Gagal menghapus: " + e.getMessage());
+        }
     }
 
     private void tampilkanPopupTanggapan(String id) {
@@ -406,23 +465,19 @@ public class form_laporan extends javax.swing.JFrame {
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addContainerGap()
+                .addGap(75, 75, 75)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(layout.createSequentialGroup()
-                        .addGap(60, 60, 60)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(layout.createSequentialGroup()
-                                .addComponent(jLabel7)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 632, Short.MAX_VALUE))
-                            .addGroup(layout.createSequentialGroup()
-                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                                    .addComponent(searchingLaporan, javax.swing.GroupLayout.PREFERRED_SIZE, 317, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                        .addComponent(jLabel1)
-                                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 1046, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                                .addGap(0, 0, Short.MAX_VALUE)))))
-                .addContainerGap())
+                        .addComponent(jLabel7)
+                        .addContainerGap(643, Short.MAX_VALUE))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addComponent(searchingLaporan, javax.swing.GroupLayout.PREFERRED_SIZE, 317, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                .addComponent(jLabel1)
+                                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 1046, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
+            .addComponent(jPanel2, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)

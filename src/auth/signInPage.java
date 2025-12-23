@@ -221,9 +221,10 @@ public class signInPage extends javax.swing.JFrame {
                         String pernikahaanUsers = rs.getString("pernikahan");
                         String role = rs.getString("role");
                         int statusAccount = rs.getInt("status");
+                        String imgProfile = rs.getString("img_profile");
 
                         config.userSession.getInstance().login(idUsers, emailUsers, passwordUsers, nikUsers, namaUsers, tempatLahirUsers, 
-                                tanggalLahirUsers, agamaUsers, jenisKelaminUsers, rtUsers, rwUsers, pekerjaanUsers, pernikahaanUsers, role, statusAccount);
+                                tanggalLahirUsers, agamaUsers, jenisKelaminUsers, rtUsers, rwUsers, pekerjaanUsers, pernikahaanUsers, role, statusAccount, imgProfile);
                         
                         if (statusAccount == 1) {
                             if (role.equalsIgnoreCase("admin")) { 

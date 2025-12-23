@@ -321,6 +321,22 @@ public class form_pengaduan extends javax.swing.JFrame {
 
     private void btnAddMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_btnAddMouseClicked
         try {
+            config.userSession session = config.userSession.getInstance();
+
+            if (session.getEmail() == null || session.getPassword() == null || session.getNik() == null || session.getNama().isEmpty()
+                    || session.getTempatLahir() == null || session.getTanggalLahir() == null
+                    || session.getAgama() == null || session.getJenisKelamin() == null
+                    || session.getRt() == null || session.getRt().isEmpty()
+                    || session.getRw() == null || session.getRw().isEmpty()
+                    || session.getPekerjaan() == null || session.getPernikahan() == null) {
+
+                JOptionPane.showMessageDialog(this,
+                        "Profil Anda belum lengkap.\n"
+                        + "Silakan lengkapi profil Anda terlebih dahulu di menu Profile.",
+                        "Akses Ditolak", JOptionPane.ERROR_MESSAGE);
+                return; 
+            }
+
             String judul = inputJudul.getText().trim();
             String deskripsi = inputDeskripsi.getText().trim();
             java.util.Date tanggal = inputTanggal.getDate();
@@ -330,12 +346,22 @@ public class form_pengaduan extends javax.swing.JFrame {
                 return;
             }
 
-            File dir = new File("src/uploads");
+            int confirm = JOptionPane.showConfirmDialog(this,
+                    "Apakah Anda yakin ingin mengirim pengaduan ini?",
+                    "Konfirmasi Pengiriman",
+                    JOptionPane.YES_NO_OPTION,
+                    JOptionPane.QUESTION_MESSAGE);
+
+            if (confirm != JOptionPane.YES_OPTION) {
+                return;
+            }
+
+            File dir = new File("src/uploads/pengaduan");
             if (!dir.exists()) {
                 dir.mkdirs();
             }
 
-            File targetFile = new File("src/uploads/" + namaFileFoto);
+            File targetFile = new File("src/uploads/pengaduan" + namaFileFoto);
             Files.copy(fileFoto.toPath(), targetFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
 
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
@@ -343,7 +369,7 @@ public class form_pengaduan extends javax.swing.JFrame {
 
             kategoriPengaduan kat = (kategoriPengaduan) selectKategori.getSelectedItem();
             int idKategori = kat.getId();
-            int idUsers = config.userSession.getInstance().getIdUsers();
+            int idUsers = session.getIdUsers();
 
             String sql = "INSERT INTO pengaduan (tgl_pegaduan, judul_pengaduan, deskripsi_pengaduan, "
                     + "foto_pengaduan, status, id_kategori_pengaduan, id_users) "
@@ -427,9 +453,9 @@ public class form_pengaduan extends javax.swing.JFrame {
 
     private void btn_sign_outActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_sign_outActionPerformed
         int confirm = JOptionPane.showConfirmDialog(this,
-            "Apakah Anda yakin ingin Logout?",
-            "Konfirmasi Logout",
-            JOptionPane.YES_NO_OPTION);
+                "Apakah Anda yakin ingin Logout?",
+                "Konfirmasi Logout",
+                JOptionPane.YES_NO_OPTION);
 
         if (confirm == JOptionPane.YES_OPTION) {
             config.userSession.getInstance().logout();
@@ -439,8 +465,8 @@ public class form_pengaduan extends javax.swing.JFrame {
                 this.dispose();
             } catch (Exception e) {
                 JOptionPane.showMessageDialog(this,
-                    "Gagal redirect ke halaman login: " + e.getMessage(),
-                    "Error", JOptionPane.ERROR_MESSAGE);
+                        "Gagal redirect ke halaman login: " + e.getMessage(),
+                        "Error", JOptionPane.ERROR_MESSAGE);
             }
         }
     }//GEN-LAST:event_btn_sign_outActionPerformed
