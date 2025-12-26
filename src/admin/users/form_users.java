@@ -1,19 +1,18 @@
 package admin.users;
 
-import admin.kategori_pengaduan.*;
-import config.connection;
-
-import config.userSession;
-import config.sessionValidator;
-
-import admin.*;
-import auth.*;
+import java.awt.Image;
+import java.io.File;
 
 import java.sql.*;
+import javax.swing.ImageIcon;
+import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
 
 public class form_users extends javax.swing.JFrame {
+
+    private File fileFoto;
+    private String namaFileFoto;
 
     public form_users() {
         if (!config.sessionValidator.checkSession(this)) {
@@ -21,68 +20,18 @@ public class form_users extends javax.swing.JFrame {
         }
 
         initComponents();
-        load_table();
-    }
-
-    private void load_table() {
-        DefaultTableModel model = new DefaultTableModel();
-        model.addColumn("No");
-        model.addColumn("Email");
-        model.addColumn("Password");
-        model.addColumn("NIK");
-        model.addColumn("Nama");
-        model.addColumn("Tempat Lahir");
-        model.addColumn("Tanggal Lahir");
-        model.addColumn("Agama");
-        model.addColumn("Jenis Kelamin");
-        model.addColumn("RT");
-        model.addColumn("RW");
-        model.addColumn("Pekerjaan");
-        model.addColumn("Status Pernikahan");
-
-        tabelUsers.setModel(model);
-
-        try {
-            int no = 1;
-            boolean foundData = false;
-            String sql = "SELECT * FROM users ORDER BY id_users ASC";
-            try (Connection conn = config.connection.getConnection();
-                    Statement st = conn.createStatement();
-                    ResultSet rs = st.executeQuery(sql)) {
-
-                while (rs.next()) {
-                    foundData = true;
-                    model.addRow(new Object[]{
-                        no++,
-                        rs.getString("email"),
-                        rs.getString("password"),
-                        rs.getString("nik"),
-                        rs.getString("nama"),
-                        rs.getString("tempat_lahir"),
-                        rs.getString("tanggal_lahir"),
-                        rs.getString("agama"),
-                        rs.getString("jenis_kelamin"),
-                        rs.getString("rt"),
-                        rs.getString("rw"),
-                        rs.getString("pekerjaan"),
-                        rs.getString("pernikahan")
-                    });
-                }
-            }
-
-            if (!foundData) {
-                model.addRow(new Object[]{"", "Data pengguna tidak ditemukan", ""});
-            }
-
-            tabelUsers.setModel(model);
-
-        } catch (SQLException e) {
-            JOptionPane.showMessageDialog(this, "Gagal memuat data pengguna: " + e.getMessage(), "Error Database", JOptionPane.ERROR_MESSAGE);
-        }
+        search_table("");
     }
 
     private void search_table(String keyword) {
-        DefaultTableModel model = new DefaultTableModel();
+        DefaultTableModel model = new DefaultTableModel() {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        };
+
+        model.addColumn("ID");
         model.addColumn("No");
         model.addColumn("Email");
         model.addColumn("Password");
@@ -96,24 +45,28 @@ public class form_users extends javax.swing.JFrame {
         model.addColumn("RW");
         model.addColumn("Pekerjaan");
         model.addColumn("Status Pernikahan");
-
-        tabelUsers.setModel(model);
+        model.addColumn("Role");
+        model.addColumn("Status Akun");
 
         try {
             int no = 1;
-            String sql = "SELECT * FROM users WHERE email LIKE ? OR nik LIKE ? OR nama LIKE ? OR agama LIKE ? OR jenis_kelamin LIKE ? ORDER BY id_users ASC";
+            String sql = "SELECT * FROM users WHERE (email LIKE ? OR nik LIKE ? OR nama LIKE ? "
+                    + "OR agama LIKE ? OR jenis_kelamin LIKE ?) ORDER BY id_users DESC";
+
             try (Connection conn = config.connection.getConnection();
                     PreparedStatement ps = conn.prepareStatement(sql)) {
 
-                ps.setString(1, "%" + keyword + "%");
-                ps.setString(2, "%" + keyword + "%");
-                ps.setString(3, "%" + keyword + "%");
-                ps.setString(4, "%" + keyword + "%");
-                ps.setString(5, "%" + keyword + "%");
+                String searchKey = "%" + keyword + "%";
+                ps.setString(1, searchKey);
+                ps.setString(2, searchKey);
+                ps.setString(3, searchKey);
+                ps.setString(4, searchKey);
+                ps.setString(5, searchKey);
 
                 try (ResultSet rs = ps.executeQuery()) {
                     while (rs.next()) {
                         model.addRow(new Object[]{
+                            rs.getString("id_users"),
                             no++,
                             rs.getString("email"),
                             rs.getString("password"),
@@ -126,32 +79,101 @@ public class form_users extends javax.swing.JFrame {
                             rs.getString("rt"),
                             rs.getString("rw"),
                             rs.getString("pekerjaan"),
-                            rs.getString("pernikahan")
+                            rs.getString("pernikahan"),
+                            rs.getString("role"),
+                            rs.getString("status")
                         });
                     }
                 }
             }
+
             tabelUsers.setModel(model);
+            tabelUsers.getColumnModel().getColumn(0).setMinWidth(0);
+            tabelUsers.getColumnModel().getColumn(0).setMaxWidth(0);
+            tabelUsers.getColumnModel().getColumn(0).setWidth(0);
+            tabelUsers.getColumnModel().getColumn(0).setPreferredWidth(0);
+            tabelUsers.getColumnModel().getColumn(1).setMaxWidth(50);
         } catch (SQLException e) {
-            JOptionPane.showMessageDialog(this, "Gagal mencari data pengguna: " + e.getMessage(), "Error Database", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Gagal memuat data: " + e.getMessage());
         }
     }
 
-    private boolean cekEmailDuplikat(String email) {
-        String sql = "SELECT COUNT(*) FROM users WHERE email = ?";
-        try (Connection conn = connection.getConnection();
+    private boolean cekEmailDuplikat(String email, String idUsers) {
+        String sql = (idUsers == null || idUsers.isEmpty())
+                ? "SELECT COUNT(*) FROM users WHERE email = ?"
+                : "SELECT COUNT(*) FROM users WHERE email = ? AND id_users != ?";
+
+        try (Connection conn = config.connection.getConnection();
                 PreparedStatement ps = conn.prepareStatement(sql)) {
 
             ps.setString(1, email);
+            if (idUsers != null && !idUsers.isEmpty()) {
+                ps.setString(2, idUsers);
+            }
+
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
                     return rs.getInt(1) > 0;
                 }
             }
         } catch (SQLException e) {
-            JOptionPane.showMessageDialog(this, "Gagal cek duplikat email: " + e.getMessage(), "Error SQL", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Gagal validasi email: " + e.getMessage());
         }
         return false;
+    }
+
+    private String getOldFoto(String id) {
+        try {
+            String sql = "SELECT img_profile FROM users WHERE id_users = ?";
+            PreparedStatement ps = config.connection.getConnection().prepareStatement(sql);
+            ps.setString(1, id);
+            ResultSet rs = ps.executeQuery();
+
+            if (rs.next()) {
+                String img = rs.getString("img_profile");
+                return (img == null || img.isEmpty()) ? "default_profile.jpg" : img;
+            }
+        } catch (Exception e) {
+            System.err.println("Error getOldFoto: " + e.getMessage());
+        }
+        return "default_profile.jpg"; 
+    }
+
+    private void loadGambarProfil(String id) {
+        try {
+            String sql = "SELECT img_profile FROM users WHERE id_users = ?";
+            Connection conn = config.connection.getConnection();
+            PreparedStatement ps = conn.prepareStatement(sql);
+            ps.setString(1, id);
+            ResultSet rs = ps.executeQuery();
+
+            String imgName = "default_profile.jpg";
+
+            if (rs.next()) {
+                String dbImg = rs.getString("img_profile");
+                if (dbImg != null && !dbImg.isEmpty()) {
+                    imgName = dbImg;
+                }
+            }
+
+            File file = new File("src/uploads/profile/" + imgName);
+            if (!file.exists()) {
+                file = new File("src/uploads/profile/default_profile.jpg");
+            }
+
+            if (file.exists()) {
+                ImageIcon icon = new ImageIcon(file.getAbsolutePath());
+                Image img = icon.getImage().getScaledInstance(profileImg.getWidth(), profileImg.getHeight(), Image.SCALE_SMOOTH);
+                profileImg.setIcon(new ImageIcon(img));
+                profileImg.setText("");
+            } else {
+                profileImg.setIcon(null);
+                profileImg.setText("Image Missing");
+            }
+
+        } catch (SQLException e) {
+            System.out.println("Error Load Gambar: " + e.getMessage());
+        }
     }
 
     private void clearForm() {
@@ -161,12 +183,19 @@ public class form_users extends javax.swing.JFrame {
         inputNama.setText("");
         inputTempatLahir.setText("");
         inputTanggalLahir.setDate(null);
-        inputAgama.setSelectedItem(0);
-        inputJenisKelamin.setSelectedItem(0);
+        inputAgama.setSelectedIndex(0);
+        inputJenisKelamin.setSelectedIndex(0);
+        inputPernikahan.setSelectedIndex(0);
+        inputRole.setSelectedIndex(0);
+        inputStatusAkun.setSelectedIndex(0);
         inputRT.setText("");
         inputRW.setText("");
         inputPekerjaan.setText("");
-        inputPernikahan.setSelectedItem(0);
+
+        profileImg.setIcon(null);
+        profileImg.setText("");
+        fileFoto = null;
+        namaFileFoto = "";
     }
 
     @SuppressWarnings("unchecked")
@@ -217,6 +246,13 @@ public class form_users extends javax.swing.JFrame {
         jLabel18 = new javax.swing.JLabel();
         inputPernikahan = new javax.swing.JComboBox<>();
         inputPekerjaan = new javax.swing.JTextField();
+        inputRole = new javax.swing.JComboBox<>();
+        jLabel16 = new javax.swing.JLabel();
+        jLabel19 = new javax.swing.JLabel();
+        inputStatusAkun = new javax.swing.JComboBox<>();
+        jPanel3 = new javax.swing.JPanel();
+        profileImg = new javax.swing.JLabel();
+        btnProfileChoose = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -427,7 +463,7 @@ public class form_users extends javax.swing.JFrame {
                 .addComponent(navLaporan)
                 .addGap(31, 31, 31)
                 .addComponent(btn_sign_out)
-                .addContainerGap(418, Short.MAX_VALUE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         jLabel5.setText("Aplikasi Layanan Pengaduan Masyakarakat Desa SukaMaju - SukaAdu");
@@ -474,155 +510,231 @@ public class form_users extends javax.swing.JFrame {
 
         inputPernikahan.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Pilih Status Pernikahaan", "Belum Menikah", "Sudah Menikah" }));
 
+        inputRole.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Pilih Role", "Admin", "Masyarakat" }));
+
+        jLabel16.setFont(new java.awt.Font("Tahoma", 0, 17)); // NOI18N
+        jLabel16.setText("Role");
+
+        jLabel19.setFont(new java.awt.Font("Tahoma", 0, 17)); // NOI18N
+        jLabel19.setText("Status Akun");
+
+        inputStatusAkun.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Pilih Status Akun", "Aktif", "Tidak Aktif" }));
+
+        profileImg.setBackground(new java.awt.Color(0, 153, 255));
+        profileImg.setOpaque(true);
+
+        javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
+        jPanel3.setLayout(jPanel3Layout);
+        jPanel3Layout.setHorizontalGroup(
+            jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(profileImg, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+        );
+        jPanel3Layout.setVerticalGroup(
+            jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel3Layout.createSequentialGroup()
+                .addComponent(profileImg, javax.swing.GroupLayout.PREFERRED_SIZE, 215, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(0, 16, Short.MAX_VALUE))
+        );
+
+        btnProfileChoose.setText("Pilih Profile");
+        btnProfileChoose.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnProfileChooseActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(59, 59, 59)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(59, 59, 59)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addGroup(layout.createSequentialGroup()
-                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(jLabel13)
-                                    .addComponent(inputJenisKelamin, javax.swing.GroupLayout.PREFERRED_SIZE, 194, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                .addGap(18, 18, 18)
-                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(inputRT, javax.swing.GroupLayout.PREFERRED_SIZE, 85, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addComponent(jLabel12))
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(inputRW, javax.swing.GroupLayout.PREFERRED_SIZE, 85, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addComponent(jLabel17))
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addGroup(layout.createSequentialGroup()
+                    .addComponent(jLabel9)
+                    .addComponent(jLabel5)
+                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 1010, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
+                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addComponent(btnProfileChoose, javax.swing.GroupLayout.PREFERRED_SIZE, 215, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addGap(47, 47, 47)
+                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                                    .addComponent(inputAgama, javax.swing.GroupLayout.PREFERRED_SIZE, 153, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                        .addGroup(layout.createSequentialGroup()
+                                            .addComponent(jLabel13)
+                                            .addGap(92, 92, 92)
+                                            .addComponent(jLabel12))
+                                        .addGroup(layout.createSequentialGroup()
+                                            .addComponent(inputJenisKelamin, javax.swing.GroupLayout.PREFERRED_SIZE, 172, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                            .addGap(18, 18, 18)
+                                            .addComponent(inputRT, javax.swing.GroupLayout.PREFERRED_SIZE, 62, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                                    .addGap(18, 18, 18)
+                                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                        .addComponent(jLabel17)
+                                        .addComponent(inputRW, javax.swing.GroupLayout.PREFERRED_SIZE, 70, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                    .addGap(15, 15, 15)
+                                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                        .addComponent(jLabel19)
                                         .addComponent(jLabel18)
-                                        .addGap(0, 0, Short.MAX_VALUE))
-                                    .addComponent(inputPekerjaan))
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                        .addComponent(inputPekerjaan, javax.swing.GroupLayout.PREFERRED_SIZE, 223, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addComponent(inputStatusAkun, javax.swing.GroupLayout.PREFERRED_SIZE, 221, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                                .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                                     .addGroup(layout.createSequentialGroup()
-                                        .addComponent(jLabel15)
-                                        .addGap(88, 88, 88))
-                                    .addComponent(inputPernikahan, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
-                            .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
-                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(jLabel11)
-                                    .addComponent(inputNIK, javax.swing.GroupLayout.PREFERRED_SIZE, 311, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                .addGap(15, 15, 15)
-                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(jLabel7)
-                                    .addComponent(inputTempatLahir, javax.swing.GroupLayout.PREFERRED_SIZE, 217, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(jLabel10)
-                                    .addComponent(inputTanggalLahir, javax.swing.GroupLayout.PREFERRED_SIZE, 191, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                .addGap(18, 18, 18)
-                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                            .addComponent(jLabel1)
+                                            .addComponent(inputEmail, javax.swing.GroupLayout.PREFERRED_SIZE, 255, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                            .addComponent(jLabel3)
+                                            .addComponent(inputPassword, javax.swing.GroupLayout.PREFERRED_SIZE, 192, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                            .addComponent(inputNama)
+                                            .addGroup(layout.createSequentialGroup()
+                                                .addComponent(jLabel6)
+                                                .addGap(0, 0, Short.MAX_VALUE))))
+                                    .addGroup(layout.createSequentialGroup()
+                                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                                                .addComponent(jLabel11)
+                                                .addGap(284, 284, 284))
+                                            .addComponent(inputNIK, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 311, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                            .addGroup(layout.createSequentialGroup()
+                                                .addComponent(jLabel7)
+                                                .addGap(0, 0, Short.MAX_VALUE))
+                                            .addComponent(inputTempatLahir))
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                            .addComponent(inputTanggalLahir, javax.swing.GroupLayout.PREFERRED_SIZE, 181, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                            .addComponent(jLabel10)))
                                     .addComponent(jLabel14)
-                                    .addComponent(inputAgama, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
-                            .addComponent(jLabel9, javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jLabel5, javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
-                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(jLabel1)
-                                    .addComponent(inputEmail, javax.swing.GroupLayout.PREFERRED_SIZE, 288, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(inputPassword, javax.swing.GroupLayout.PREFERRED_SIZE, 285, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addComponent(jLabel3))
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(jLabel6)
-                                    .addComponent(inputNama, javax.swing.GroupLayout.PREFERRED_SIZE, 335, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                            .addGroup(layout.createSequentialGroup()
-                                .addGap(0, 0, Short.MAX_VALUE)
-                                .addComponent(inputSearching, javax.swing.GroupLayout.PREFERRED_SIZE, 233, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addComponent(jScrollPane1, javax.swing.GroupLayout.Alignment.LEADING))
-                        .addGap(68, 68, 68))
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(198, 198, 198)
-                        .addComponent(btnAdd, javax.swing.GroupLayout.PREFERRED_SIZE, 148, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(26, 26, 26)
-                        .addComponent(btnUpdate, javax.swing.GroupLayout.PREFERRED_SIZE, 137, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(27, 27, 27)
-                        .addComponent(btnDelete, javax.swing.GroupLayout.PREFERRED_SIZE, 148, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(27, 27, 27)
-                        .addComponent(btnClear, javax.swing.GroupLayout.PREFERRED_SIZE, 137, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(0, 0, Short.MAX_VALUE))))
+                                    .addGroup(layout.createSequentialGroup()
+                                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                                            .addGroup(layout.createSequentialGroup()
+                                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                                    .addComponent(inputPernikahan, javax.swing.GroupLayout.PREFERRED_SIZE, 253, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                    .addComponent(jLabel15))
+                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                                    .addComponent(inputRole, javax.swing.GroupLayout.PREFERRED_SIZE, 240, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                    .addComponent(jLabel16))
+                                                .addGap(63, 63, 63))
+                                            .addGroup(layout.createSequentialGroup()
+                                                .addComponent(btnAdd, javax.swing.GroupLayout.PREFERRED_SIZE, 190, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                .addGap(18, 18, 18)
+                                                .addComponent(btnUpdate, javax.swing.GroupLayout.PREFERRED_SIZE, 174, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                .addGap(18, 18, 18)
+                                                .addComponent(btnDelete, javax.swing.GroupLayout.PREFERRED_SIZE, 171, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                                        .addGap(18, 18, 18)
+                                        .addComponent(btnClear, javax.swing.GroupLayout.PREFERRED_SIZE, 157, javax.swing.GroupLayout.PREFERRED_SIZE)))))
+                        .addComponent(inputSearching, javax.swing.GroupLayout.PREFERRED_SIZE, 218, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
             .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
                         .addGap(45, 45, 45)
                         .addComponent(jLabel9)
                         .addGap(10, 10, 10)
                         .addComponent(jLabel5)
-                        .addGap(43, 43, 43)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(jLabel1)
-                            .addComponent(jLabel3)
-                            .addComponent(jLabel6))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                                .addComponent(inputEmail, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addComponent(inputPassword, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addComponent(inputNama, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addGap(18, 18, 18)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(jLabel11)
-                            .addComponent(jLabel7)
-                            .addComponent(jLabel10)
-                            .addComponent(jLabel14))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                                .addComponent(inputNIK, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addComponent(inputTempatLahir, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addComponent(inputTanggalLahir, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addComponent(inputAgama, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGap(59, 59, 59)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                             .addGroup(layout.createSequentialGroup()
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
+                                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                                    .addComponent(jLabel1)
+                                                    .addComponent(jLabel3))
+                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                                    .addComponent(inputEmail, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                    .addComponent(inputPassword, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                                                .addComponent(jLabel6)
+                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                                .addComponent(inputNama, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                            .addGroup(layout.createSequentialGroup()
+                                                .addComponent(jLabel11)
+                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                                .addComponent(inputNIK, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                            .addGroup(layout.createSequentialGroup()
+                                                .addComponent(jLabel10)
+                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                                .addComponent(inputTanggalLahir, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                                    .addComponent(jPanel3, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addComponent(btnProfileChoose, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addGroup(layout.createSequentialGroup()
+                                .addGap(79, 79, 79)
+                                .addComponent(jLabel7)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(inputTempatLahir, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                        .addGroup(layout.createSequentialGroup()
+                                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                                .addComponent(jLabel13)
+                                                .addComponent(jLabel12))
+                                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                                .addComponent(inputJenisKelamin, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                .addComponent(inputRT, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                                        .addGroup(layout.createSequentialGroup()
+                                            .addComponent(jLabel14)
+                                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                            .addComponent(inputAgama, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                        .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                                            .addComponent(jLabel18)
+                                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                            .addComponent(inputPekerjaan, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                                    .addGroup(layout.createSequentialGroup()
+                                        .addComponent(jLabel17)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                        .addComponent(inputRW, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)))
                                 .addGap(18, 18, 18)
                                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                                        .addComponent(jLabel18)
-                                        .addComponent(jLabel15))
-                                    .addComponent(jLabel17))
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                    .addGroup(layout.createSequentialGroup()
+                                        .addComponent(jLabel16)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                        .addComponent(inputRole, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                    .addGroup(layout.createSequentialGroup()
+                                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                            .addComponent(jLabel19)
+                                            .addComponent(jLabel15))
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                            .addComponent(inputStatusAkun, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                            .addComponent(inputPernikahan, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                                .addGap(32, 32, 32)
                                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                                    .addComponent(inputJenisKelamin, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addComponent(inputRT, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addComponent(inputRW, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addComponent(inputPernikahan, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addComponent(inputPekerjaan, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                            .addGroup(layout.createSequentialGroup()
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                                    .addComponent(jLabel12)
-                                    .addComponent(jLabel13))))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(btnAdd, javax.swing.GroupLayout.PREFERRED_SIZE, 38, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(btnUpdate, javax.swing.GroupLayout.PREFERRED_SIZE, 38, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(btnDelete, javax.swing.GroupLayout.PREFERRED_SIZE, 38, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(btnClear, javax.swing.GroupLayout.PREFERRED_SIZE, 38, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addGap(48, 48, 48)
+                                    .addComponent(btnAdd, javax.swing.GroupLayout.PREFERRED_SIZE, 38, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addComponent(btnUpdate, javax.swing.GroupLayout.PREFERRED_SIZE, 38, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addComponent(btnDelete, javax.swing.GroupLayout.PREFERRED_SIZE, 38, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addComponent(btnClear, javax.swing.GroupLayout.PREFERRED_SIZE, 38, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                        .addGap(55, 55, 55)
                         .addComponent(inputSearching, javax.swing.GroupLayout.PREFERRED_SIZE, 39, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 221, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(25, 25, 25))
+                        .addGap(27, 27, 27)
+                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 206, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addContainerGap(52, Short.MAX_VALUE))
                     .addGroup(layout.createSequentialGroup()
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                        .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
         );
 
         pack();
@@ -641,15 +753,18 @@ public class form_users extends javax.swing.JFrame {
         String rwInput = inputRW.getText().trim();
         String pekerjaanInput = inputPekerjaan.getText().trim();
         String pernikahanInput = inputPernikahan.getSelectedItem().toString();
+        String roleInput = inputRole.getSelectedItem().toString();
+        String statusInput = inputStatusAkun.getSelectedItem().toString();
 
         if (emailInput.isEmpty() || passwordInput.isEmpty() || nikInput.isEmpty() || namaInput.isEmpty()
                 || tempatLahirInput.isEmpty() || tanggalLahirInput == null
-                || rtInput.isEmpty() || rwInput.isEmpty() || pekerjaanInput.isEmpty()) {
+                || rtInput.isEmpty() || rwInput.isEmpty() || pekerjaanInput.isEmpty() || roleInput.isEmpty() || statusInput.isEmpty()) {
             JOptionPane.showMessageDialog(this,
                     "Semua field wajib diisi!",
                     "Peringatan",
                     JOptionPane.WARNING_MESSAGE);
             return;
+
         }
 
         if (!config.validasiEmail.isValidEmail(emailInput)) {
@@ -658,10 +773,9 @@ public class form_users extends javax.swing.JFrame {
             return;
         }
 
-        if (cekEmailDuplikat(emailInput)) {
+        if (cekEmailDuplikat(emailInput, "")) {
             JOptionPane.showMessageDialog(this, "Email ini sudah terdaftar. Silakan gunakan email lain.", "Registrasi Gagal", JOptionPane.ERROR_MESSAGE);
-            inputEmail.setText("");
-            inputPassword.setText("");
+            inputEmail.requestFocus();
             return;
         }
 
@@ -669,21 +783,36 @@ public class form_users extends javax.swing.JFrame {
             JOptionPane.showMessageDialog(this, "Password harus memiliki minimal 8 karakter!", "Peringatan", JOptionPane.WARNING_MESSAGE);
             inputPassword.setText("");
             return;
+
         }
 
-        if (nikInput.length() == 16) {
-            JOptionPane.showMessageDialog(this, "NIK harus memiliki minimal 16 karakter!", "Peringatan", JOptionPane.WARNING_MESSAGE);
-            inputPassword.setText("");
+        if (nikInput.length() != 16) {
+            JOptionPane.showMessageDialog(this,
+                    "NIK harus tepat 16 digit! (Input saat ini: " + nikInput.length() + " digit)",
+                    "Peringatan",
+                    JOptionPane.WARNING_MESSAGE);
+            inputNIK.requestFocus();
+            return;
+
+        }
+
+        if (!nikInput.matches("[0-9]+")) {
+            JOptionPane.showMessageDialog(this, "NIK hanya boleh berisi angka!", "Peringatan", JOptionPane.WARNING_MESSAGE);
+            inputNIK.setText("");
             return;
         }
 
-        String hashedPassword = config.hashUtils.hashMD5(passwordInput);
-        String sql = "INSERT INTO users "
-                + "(email, password, nik, nama, tempat_lahir, tanggal_lahir, agama, jenis_kelamin, rt, rw, pekerjaan, pernikahan, role, status) "
-                + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        String fotoSimpan = (fileFoto != null) ? namaFileFoto : "default_profile.jpg";
 
-        try (Connection conn = connection.getConnection();
-                PreparedStatement ps = conn.prepareStatement(sql)) {
+        try {
+            String hashedPassword = config.hashUtils.hashMD5(passwordInput);
+
+            String sql = "INSERT INTO users (email, password, nik, nama, tempat_lahir, tanggal_lahir, agama, "
+                    + "jenis_kelamin, rt, rw, pekerjaan, pernikahan, role, status, img_profile) "
+                    + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+
+            Connection conn = config.connection.getConnection();
+            PreparedStatement ps = conn.prepareStatement(sql);
 
             ps.setString(1, emailInput);
             ps.setString(2, hashedPassword);
@@ -697,24 +826,43 @@ public class form_users extends javax.swing.JFrame {
             ps.setString(10, rwInput);
             ps.setString(11, pekerjaanInput);
             ps.setString(12, pernikahanInput);
-            ps.setString(13, "masyarakat");
-            ps.setInt(14, 1);
+            ps.setString(13, roleInput);
+            ps.setString(14, statusInput);
+            ps.setString(15, fotoSimpan);
 
-            int rowsAffected = ps.executeUpdate();
+            if (ps.executeUpdate() > 0) {
+                if (fileFoto != null) {
+                    File dir = new File("src/uploads/profile");
+                    if (!dir.exists()) {
+                        dir.mkdirs();
+                    }
 
-            if (rowsAffected > 0) {
-                JOptionPane.showMessageDialog(this, "Data user berhasil ditambahkan.", "Sukses", JOptionPane.INFORMATION_MESSAGE);
-                load_table();
+                    java.nio.file.Files.copy(fileFoto.toPath(),
+                            new File(dir + "/" + fotoSimpan).toPath(),
+                            java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+                }
+
+                JOptionPane.showMessageDialog(this, "Data '" + namaInput + "' berhasil ditambahkan!", "Sukses", JOptionPane.INFORMATION_MESSAGE);
+                search_table("");
                 clearForm();
             }
-
         } catch (SQLException e) {
-            JOptionPane.showMessageDialog(this, "Gagal menambahkan data user: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Gagal simpan ke Database: " + e.getMessage(), "Database Error", JOptionPane.ERROR_MESSAGE);
+        } catch (java.io.IOException ex) {
+            JOptionPane.showMessageDialog(this, "Gagal mengunggah foto: " + ex.getMessage(), "File Error", JOptionPane.ERROR_MESSAGE);
         }
-
     }//GEN-LAST:event_btnAddActionPerformed
 
     private void btnUpdateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnUpdateActionPerformed
+        int baris = tabelUsers.getSelectedRow();
+        if (baris == -1) {
+            JOptionPane.showMessageDialog(this, "Pilih baris data dari tabel yang ingin diubah!", "Peringatan", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        String idUsers = tabelUsers.getValueAt(baris, 0).toString();
+        String emailLama = tabelUsers.getValueAt(baris, 2).toString();
+
         String emailInput = inputEmail.getText().trim();
         String passwordInput = inputPassword.getText().trim();
         String nikInput = inputNIK.getText().trim();
@@ -727,117 +875,198 @@ public class form_users extends javax.swing.JFrame {
         String rwInput = inputRW.getText().trim();
         String pekerjaanInput = inputPekerjaan.getText().trim();
         String pernikahanInput = inputPernikahan.getSelectedItem().toString();
+        String roleInput = inputRole.getSelectedItem().toString();
+        String statusInput = inputStatusAkun.getSelectedItem().toString();
 
+        if (emailInput.isEmpty() || nikInput.isEmpty() || namaInput.isEmpty()
+                || tempatLahirInput.isEmpty() || tanggalLahirInput == null
+                || rtInput.isEmpty() || rwInput.isEmpty() || pekerjaanInput.isEmpty()) {
+            JOptionPane.showMessageDialog(this,
+                    "Semua field wajib diisi!",
+                    "Peringatan",
+                    JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        if (!emailInput.equals(emailLama)) {
+            if (cekEmailDuplikat(emailInput, idUsers)) {
+                JOptionPane.showMessageDialog(this, "Email '" + emailInput + "' sudah terdaftar pada akun lain!", "Gagal Update", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+        }
+
+        if (nikInput.length() != 16 || !nikInput.matches("[0-9]+")) {
+            JOptionPane.showMessageDialog(this, "NIK harus berisi 16 digit angka!", "Peringatan", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        try {
+            Connection conn = config.connection.getConnection();
+            String sql;
+            PreparedStatement ps;
+            String oldFoto = getOldFoto(idUsers);
+            String fotoUpdate = (fileFoto != null) ? namaFileFoto : oldFoto;
+
+            if (!passwordInput.isEmpty()) {
+                if (passwordInput.length() < 8) {
+                    JOptionPane.showMessageDialog(this, "Password baru minimal 8 karakter!");
+                    return;
+                }
+                sql = "UPDATE users SET email=?, password=?, nik=?, nama=?, tempat_lahir=?, tanggal_lahir=?, "
+                        + "agama=?, jenis_kelamin=?, rt=?, rw=?, pekerjaan=?, pernikahan=?, role=?, status=?, img_profile=? "
+                        + "WHERE id_users=?";
+                ps = conn.prepareStatement(sql);
+                ps.setString(1, emailInput);
+                ps.setString(2, config.hashUtils.hashMD5(passwordInput));
+                ps.setString(3, nikInput);
+                ps.setString(4, namaInput);
+                ps.setString(5, tempatLahirInput);
+                ps.setString(6, new java.text.SimpleDateFormat("yyyy-MM-dd").format(tanggalLahirInput));
+                ps.setString(7, agamaInput);
+                ps.setString(8, jenisKelaminInput);
+                ps.setString(9, rtInput);
+                ps.setString(10, rwInput);
+                ps.setString(11, pekerjaanInput);
+                ps.setString(12, pernikahanInput);
+                ps.setString(13, roleInput);
+                ps.setString(14, statusInput);
+                ps.setString(15, fotoUpdate);
+                ps.setString(16, idUsers);
+            } else {
+                sql = "UPDATE users SET email=?, nik=?, nama=?, tempat_lahir=?, tanggal_lahir=?, "
+                        + "agama=?, jenis_kelamin=?, rt=?, rw=?, pekerjaan=?, pernikahan=?, role=?, status=?, img_profile=? "
+                        + "WHERE id_users=?";
+                ps = conn.prepareStatement(sql);
+                ps.setString(1, emailInput);
+                ps.setString(2, nikInput);
+                ps.setString(3, namaInput);
+                ps.setString(4, tempatLahirInput);
+                ps.setString(5, new java.text.SimpleDateFormat("yyyy-MM-dd").format(tanggalLahirInput));
+                ps.setString(6, agamaInput);
+                ps.setString(7, jenisKelaminInput);
+                ps.setString(8, rtInput);
+                ps.setString(9, rwInput);
+                ps.setString(10, pekerjaanInput);
+                ps.setString(11, pernikahanInput);
+                ps.setString(12, roleInput);
+                ps.setString(13, statusInput);
+                ps.setString(14, fotoUpdate);
+                ps.setString(15, idUsers);
+            }
+
+            if (ps.executeUpdate() > 0) {
+                if (fileFoto != null) {
+                    File dir = new File("src/uploads/profile");
+                    if (!dir.exists()) {
+                        dir.mkdirs();
+                    }
+                    if (oldFoto != null && !oldFoto.equals("default_profile.jpg")) {
+                        File fOld = new File(dir + "/" + oldFoto);
+                        if (fOld.exists()) {
+                            fOld.delete();
+                        }
+                    }
+                    java.nio.file.Files.copy(fileFoto.toPath(),
+                            new File(dir + "/" + namaFileFoto).toPath(),
+                            java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+                }
+
+                JOptionPane.showMessageDialog(this, "Data '" + namaInput + "' berhasil diperbarui!", "Sukses", JOptionPane.INFORMATION_MESSAGE);
+                search_table("");
+                clearForm();
+            }
+
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "Error saat update: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }//GEN-LAST:event_btnUpdateActionPerformed
+
+    private void btnDeleteActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDeleteActionPerformed
         int baris = tabelUsers.getSelectedRow();
         if (baris == -1) {
             JOptionPane.showMessageDialog(this,
-                    "Pilih baris data yang ingin diubah terlebih dahulu.",
+                    "Pilih baris data yang ingin dihapus terlebih dahulu!",
                     "Peringatan",
                     JOptionPane.WARNING_MESSAGE);
             return;
         }
 
         String idUsers = tabelUsers.getValueAt(baris, 0).toString();
-
-        if (emailInput.isEmpty() || passwordInput.isEmpty() || nikInput.isEmpty()
-                || namaInput.isEmpty() || tempatLahirInput.isEmpty()
-                || tanggalLahirInput == null || rtInput.isEmpty()
-                || rwInput.isEmpty() || pekerjaanInput.isEmpty()) {
-
-            JOptionPane.showMessageDialog(this, "Semua field wajib diisi!", "Peringatan", JOptionPane.WARNING_MESSAGE);
-            return;
-        }
-
-        String sql = "UPDATE users SET email=?, password=?, nik=?, nama=?, tempat_lahir=?, tanggal_lahir=?, agama=?, "
-                + "jenis_kelamin=?, rt=?, rw=?, pekerjaan=?, pernikahan=? WHERE id_users=?";
-
-        try (Connection conn = connection.getConnection();
-                PreparedStatement ps = conn.prepareStatement(sql)) {
-
-            ps.setString(1, emailInput);
-            ps.setString(2, passwordInput);
-            ps.setString(3, nikInput);
-            ps.setString(4, namaInput);
-            ps.setString(5, tempatLahirInput);
-            ps.setDate(6, new java.sql.Date(tanggalLahirInput.getTime()));
-            ps.setString(7, agamaInput);
-            ps.setString(8, jenisKelaminInput);
-            ps.setString(9, rtInput);
-            ps.setString(10, rwInput);
-            ps.setString(11, pekerjaanInput);
-            ps.setString(12, pernikahanInput);
-            ps.setString(13, idUsers);
-
-            int rowsAffected = ps.executeUpdate();
-
-            if (rowsAffected > 0) {
-                JOptionPane.showMessageDialog(this, "Data pengguna berhasil diubah.", "Sukses", JOptionPane.INFORMATION_MESSAGE);
-                load_table();
-                clearForm();
-            } else {
-                JOptionPane.showMessageDialog(this, "Gagal mengubah data pengguna.", "Error", JOptionPane.ERROR_MESSAGE);
-            }
-
-        } catch (SQLException e) {
-            JOptionPane.showMessageDialog(this, "Gagal mengubah data: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-        }
-
-    }//GEN-LAST:event_btnUpdateActionPerformed
-
-    private void btnDeleteActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDeleteActionPerformed
-        int baris = tabelUsers.getSelectedRow();
-        if (baris == -1) {
-            JOptionPane.showMessageDialog(this, "Pilih baris data yang ingin dihapus terlebih dahulu.", "Peringatan", JOptionPane.WARNING_MESSAGE);
-            return;
-        }
-
-        String idUsers = tabelUsers.getModel().getValueAt(baris, 1).toString();
-        int konfirmasi = JOptionPane.showConfirmDialog(this, "Yakin ingin menghapus data pengguna : " + tabelUsers.getModel().getValueAt(baris, 4).toString() + "?", "Konfirmasi Hapus", JOptionPane.YES_NO_OPTION);
+        String namaUser = tabelUsers.getValueAt(baris, 5).toString();
+        int konfirmasi = JOptionPane.showConfirmDialog(this,
+                "Apakah Anda yakin ingin menghapus data pengguna: " + namaUser + "?\n"
+                + "Data yang dihapus tidak dapat dikembalikan.",
+                "Konfirmasi Hapus",
+                JOptionPane.YES_NO_OPTION,
+                JOptionPane.QUESTION_MESSAGE);
 
         if (konfirmasi == JOptionPane.YES_OPTION) {
+            try {
+                String namaFotoLama = getOldFoto(idUsers);
+                String sql = "DELETE FROM users WHERE id_users = ?";
+                Connection conn = config.connection.getConnection();
+                try (PreparedStatement ps = conn.prepareStatement(sql)) {
+                    ps.setString(1, idUsers);
 
-            String sql = "DELETE FROM users WHERE email = ?";
+                    int rowsAffected = ps.executeUpdate();
 
-            try (Connection conn = connection.getConnection();
-                    PreparedStatement ps = conn.prepareStatement(sql)) {
-                ps.setString(1, idUsers);
-                int rowsAffected = ps.executeUpdate();
-                if (rowsAffected > 0) {
-                    JOptionPane.showMessageDialog(this, "Data pengguna berhasil dihapus.", "Sukses", JOptionPane.INFORMATION_MESSAGE);
-                    load_table();
-                    clearForm();
+                    if (rowsAffected > 0) {
+                        if (namaFotoLama != null && !namaFotoLama.equals("default_profile.jpg")) {
+                            File fileFoto = new File("src/uploads/profile/" + namaFotoLama);
+                            if (fileFoto.exists()) {
+                                fileFoto.delete();
+                            }
+                        }
+
+                        JOptionPane.showMessageDialog(this,
+                                "Data pengguna '" + namaUser + "' berhasil dihapus.",
+                                "Sukses",
+                                JOptionPane.INFORMATION_MESSAGE);
+
+                        search_table("");
+                        clearForm();
+                    }
                 }
             } catch (SQLException e) {
-                JOptionPane.showMessageDialog(this, "Gagal menghapus data: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(this,
+                        "Gagal menghapus data dari database: " + e.getMessage(),
+                        "Error Database",
+                        JOptionPane.ERROR_MESSAGE);
             }
         }
     }//GEN-LAST:event_btnDeleteActionPerformed
 
     private void tabelUsersMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tabelUsersMouseClicked
-        int row = tabelUsers.rowAtPoint(evt.getPoint());
-        if (row < 0) {
+        int row = tabelUsers.getSelectedRow();
+        if (row == -1) {
             return;
         }
         DefaultTableModel model = (DefaultTableModel) tabelUsers.getModel();
 
-        String email = model.getValueAt(row, 1) != null ? model.getValueAt(row, 1).toString() : "";
-        String password = model.getValueAt(row, 2) != null ? model.getValueAt(row, 2).toString() : "";
-        String nik = model.getValueAt(row, 3) != null ? model.getValueAt(row, 3).toString() : "";
-        String nama = model.getValueAt(row, 4) != null ? model.getValueAt(row, 4).toString() : "";
-        String tempatLahir = model.getValueAt(row, 5) != null ? model.getValueAt(row, 5).toString() : "";
-        String tanggalLahir = model.getValueAt(row, 6) != null ? model.getValueAt(row, 6).toString() : "";
-        String agama = model.getValueAt(row, 7) != null ? model.getValueAt(row, 7).toString() : "";
-        String jenisKelamin = model.getValueAt(row, 8) != null ? model.getValueAt(row, 8).toString() : "";
-        String rt = model.getValueAt(row, 9) != null ? model.getValueAt(row, 9).toString() : "";
-        String rw = model.getValueAt(row, 10) != null ? model.getValueAt(row, 10).toString() : "";
-        String pekerjaan = model.getValueAt(row, 11) != null ? model.getValueAt(row, 11).toString() : "";
-        String pernikahan = model.getValueAt(row, 12) != null ? model.getValueAt(row, 12).toString() : "";
+        String idUsers = model.getValueAt(row, 0) == null ? "" : model.getValueAt(row, 0).toString();
+        String email = model.getValueAt(row, 2) == null ? "" : model.getValueAt(row, 2).toString();
+        String nik = model.getValueAt(row, 4) == null ? "" : model.getValueAt(row, 4).toString();
+        String nama = model.getValueAt(row, 5) == null ? "" : model.getValueAt(row, 5).toString();
+        String tempatLahir = model.getValueAt(row, 6) == null ? "" : model.getValueAt(row, 6).toString();
+        String tanggalLahir = model.getValueAt(row, 7) == null ? "" : model.getValueAt(row, 7).toString();
+        String agama = model.getValueAt(row, 8) == null ? "" : model.getValueAt(row, 8).toString();
+        String jenisKelamin = model.getValueAt(row, 9) == null ? "" : model.getValueAt(row, 9).toString();
+        String rt = model.getValueAt(row, 10) == null ? "" : model.getValueAt(row, 10).toString();
+        String rw = model.getValueAt(row, 11) == null ? "" : model.getValueAt(row, 11).toString();
+        String pekerjaan = model.getValueAt(row, 12) == null ? "" : model.getValueAt(row, 12).toString();
+        String pernikahan = model.getValueAt(row, 13) == null ? "" : model.getValueAt(row, 13).toString();
+        String role = model.getValueAt(row, 14) == null ? "" : model.getValueAt(row, 14).toString();
+        String statusAkun = model.getValueAt(row, 15) == null ? "" : model.getValueAt(row, 15).toString();
 
         inputEmail.setText(email);
-        inputPassword.setText(password);
+        inputPassword.setText("");
         inputNIK.setText(nik);
         inputNama.setText(nama);
         inputTempatLahir.setText(tempatLahir);
+        inputRT.setText(rt);
+        inputRW.setText(rw);
+        inputPekerjaan.setText(pekerjaan);
+
         try {
             if (!tanggalLahir.isEmpty()) {
                 java.util.Date date = new java.text.SimpleDateFormat("yyyy-MM-dd").parse(tanggalLahir);
@@ -848,12 +1077,25 @@ public class form_users extends javax.swing.JFrame {
         } catch (Exception e) {
             inputTanggalLahir.setDate(null);
         }
-        inputAgama.setSelectedItem(agama);
-        inputJenisKelamin.setSelectedItem(jenisKelamin);
-        inputRT.setText(rt);
-        inputRW.setText(rw);
-        inputPekerjaan.setText(pekerjaan);
-        inputPernikahan.setSelectedItem(pernikahan);
+
+        if (!agama.isEmpty()) {
+            inputAgama.setSelectedItem(agama);
+        }
+        if (!jenisKelamin.isEmpty()) {
+            inputJenisKelamin.setSelectedItem(jenisKelamin);
+        }
+        if (!pernikahan.isEmpty()) {
+            inputPernikahan.setSelectedItem(pernikahan);
+        }
+        if (!role.isEmpty()) {
+            inputRole.setSelectedItem(role);
+        }
+        if (!statusAkun.isEmpty()) {
+            inputStatusAkun.setSelectedItem(statusAkun);
+        }
+        if (!idUsers.isEmpty()) {
+            loadGambarProfil(idUsers);
+        }
     }//GEN-LAST:event_tabelUsersMouseClicked
 
     private void btnClearActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnClearActionPerformed
@@ -863,7 +1105,7 @@ public class form_users extends javax.swing.JFrame {
     private void inputSearchingKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_inputSearchingKeyReleased
         String keyword = inputSearching.getText().trim();
         if (keyword.isEmpty()) {
-            load_table();
+            search_table("");
         } else {
             search_table(keyword);
         }
@@ -951,13 +1193,32 @@ public class form_users extends javax.swing.JFrame {
 
     private void navLaporanMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_navLaporanMouseClicked
         try {
-            admin.rekap_laporan.form_rekap_laporan rekapLaporanForm = new  admin.rekap_laporan.form_rekap_laporan();
+            admin.rekap_laporan.form_rekap_laporan rekapLaporanForm = new admin.rekap_laporan.form_rekap_laporan();
             rekapLaporanForm.setVisible(true);
             this.dispose();
         } catch (Exception e) {
             JOptionPane.showMessageDialog(this, "Gagal membuka form rekap laporan : " + e.getMessage(), "Error Redirect", JOptionPane.ERROR_MESSAGE);
         }
     }//GEN-LAST:event_navLaporanMouseClicked
+
+    private void btnProfileChooseActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnProfileChooseActionPerformed
+        JFileChooser chooser = new JFileChooser();
+        chooser.showOpenDialog(null);
+        File f = chooser.getSelectedFile();
+
+        if (f != null) {
+            fileFoto = f;
+            namaFileFoto = "profile_" + System.currentTimeMillis() + "_" + f.getName();
+
+            try {
+                ImageIcon icon = new ImageIcon(f.getAbsolutePath());
+                Image img = icon.getImage().getScaledInstance(profileImg.getWidth(), profileImg.getHeight(), Image.SCALE_SMOOTH);
+                profileImg.setIcon(new ImageIcon(img));
+            } catch (Exception e) {
+                JOptionPane.showMessageDialog(this, "Gagal memuat gambar: " + e.getMessage());
+            }
+        }
+    }//GEN-LAST:event_btnProfileChooseActionPerformed
 
     public static void main(String args[]) {
         java.awt.EventQueue.invokeLater(new Runnable() {
@@ -971,6 +1232,7 @@ public class form_users extends javax.swing.JFrame {
     private javax.swing.JButton btnAdd;
     private javax.swing.JButton btnClear;
     private javax.swing.JButton btnDelete;
+    private javax.swing.JButton btnProfileChoose;
     private javax.swing.JButton btnUpdate;
     private javax.swing.JButton btn_sign_out;
     private javax.swing.JComboBox<String> inputAgama;
@@ -983,7 +1245,9 @@ public class form_users extends javax.swing.JFrame {
     private javax.swing.JComboBox<String> inputPernikahan;
     private javax.swing.JTextField inputRT;
     private javax.swing.JTextField inputRW;
+    private javax.swing.JComboBox<String> inputRole;
     private javax.swing.JTextField inputSearching;
+    private javax.swing.JComboBox<String> inputStatusAkun;
     private com.toedter.calendar.JDateChooser inputTanggalLahir;
     private javax.swing.JTextField inputTempatLahir;
     private javax.swing.JLabel jLabel1;
@@ -993,8 +1257,10 @@ public class form_users extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel13;
     private javax.swing.JLabel jLabel14;
     private javax.swing.JLabel jLabel15;
+    private javax.swing.JLabel jLabel16;
     private javax.swing.JLabel jLabel17;
     private javax.swing.JLabel jLabel18;
+    private javax.swing.JLabel jLabel19;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
@@ -1003,6 +1269,7 @@ public class form_users extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel9;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
+    private javax.swing.JPanel jPanel3;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JLabel navBerita;
     private javax.swing.JLabel navDashboard;
@@ -1011,6 +1278,7 @@ public class form_users extends javax.swing.JFrame {
     private javax.swing.JLabel navPengaduan;
     private javax.swing.JLabel navProfile;
     private javax.swing.JLabel navUsers;
+    private javax.swing.JLabel profileImg;
     private javax.swing.JTable tabelUsers;
     // End of variables declaration//GEN-END:variables
 

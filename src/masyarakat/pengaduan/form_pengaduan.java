@@ -361,7 +361,7 @@ public class form_pengaduan extends javax.swing.JFrame {
                 dir.mkdirs();
             }
 
-            File targetFile = new File("src/uploads/pengaduan" + namaFileFoto);
+            File targetFile = new File("src/uploads/pengaduan/" + namaFileFoto);
             Files.copy(fileFoto.toPath(), targetFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
 
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");

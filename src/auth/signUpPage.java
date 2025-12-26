@@ -268,7 +268,7 @@ public class signUpPage extends javax.swing.JFrame {
         }
 
         String hashedPassword = config.hashUtils.hashMD5(passwordInput);
-        String sql = "INSERT INTO users (email, password, nama, role, status) VALUES (?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO users (email, password, nama, role, , img_profile) VALUES (?, ?, ?, ?, ?, ?)";
         
         try (Connection conn = connection.getConnection(); 
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -276,8 +276,9 @@ public class signUpPage extends javax.swing.JFrame {
             ps.setString(1, emailInput);
             ps.setString(2, hashedPassword);
             ps.setString(3, namaInput);
-            ps.setString(4, "masyarakat");
-            ps.setInt(5, 1);
+            ps.setString(4, "Masyarakat");
+            ps.setString(5, "Aktif");
+            ps.setString(6, "default_profile.jpg");
 
             int rowsAffected = ps.executeUpdate();
             if (rowsAffected > 0) {

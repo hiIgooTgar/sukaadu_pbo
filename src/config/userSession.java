@@ -18,7 +18,7 @@ public class userSession {
     private String pekerjaan;
     private String pernikahan;
     private String role;
-    private int status;
+    private String status;
     private String img_profile;
 
     private userSession() {
@@ -36,7 +36,7 @@ public class userSession {
         this.pekerjaan = null;
         this.pernikahan = null;
         this.role = null;
-        this.status = 0;
+        this.status = null;
         this.img_profile = null;
     }
 
@@ -48,7 +48,7 @@ public class userSession {
     }
 
     public void login(int id_users, String email, String password, String nik, String nama, String tempatLahir, Date tanggalLahir,
-            String agama, String jenisKelamin, String rt, String rw, String pekerjaan, String pernikahan, String role, int status, String imgProfile) {
+            String agama, String jenisKelamin, String rt, String rw, String pekerjaan, String pernikahan, String role, String status, String imgProfile) {
         this.id_users = id_users;
         this.email = email;
         this.password = password;
@@ -83,7 +83,7 @@ public class userSession {
         this.pekerjaan = null;
         this.pernikahan = null;
         this.role = null;
-        this.status = 0;
+        this.status = null;
         this.img_profile = null;
     }
 
@@ -143,7 +143,7 @@ public class userSession {
         return role;
     }
 
-    public int getStatus() {
+    public String getStatus() {
         return status;
     }
     

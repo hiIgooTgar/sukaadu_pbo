@@ -197,14 +197,14 @@ public class signInPage extends javax.swing.JFrame {
         String hashedInputPassword = config.hashUtils.hashMD5(passwordInput);
         String sql = "SELECT * FROM users WHERE email = ?";
 
-        try (Connection conn = connection.getConnection(); 
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+        try (Connection conn = connection.getConnection();
+                PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, emailInput);
 
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
                     String hashedPasswordDB = rs.getString("password");
-                    
+
                     if (hashedInputPassword.equals(hashedPasswordDB)) {
                         int idUsers = rs.getInt("id_users");
                         String emailUsers = rs.getString("email");
@@ -212,7 +212,7 @@ public class signInPage extends javax.swing.JFrame {
                         String nikUsers = rs.getString("nik");
                         String namaUsers = rs.getString("nama");
                         String tempatLahirUsers = rs.getString("tempat_lahir");
-                        Date tanggalLahirUsers = rs.getDate("tanggal_lahir");
+                        java.sql.Date tanggalLahirUsers = rs.getDate("tanggal_lahir");
                         String agamaUsers = rs.getString("agama");
                         String jenisKelaminUsers = rs.getString("jenis_kelamin");
                         String rtUsers = rs.getString("rt");
@@ -220,45 +220,41 @@ public class signInPage extends javax.swing.JFrame {
                         String pekerjaanUsers = rs.getString("pekerjaan");
                         String pernikahaanUsers = rs.getString("pernikahan");
                         String role = rs.getString("role");
-                        int statusAccount = rs.getInt("status");
+                        String statusAccount = rs.getString("status");
                         String imgProfile = rs.getString("img_profile");
 
-                        config.userSession.getInstance().login(idUsers, emailUsers, passwordUsers, nikUsers, namaUsers, tempatLahirUsers, 
+                        config.userSession.getInstance().login(idUsers, emailUsers, passwordUsers, nikUsers, namaUsers, tempatLahirUsers,
                                 tanggalLahirUsers, agamaUsers, jenisKelaminUsers, rtUsers, rwUsers, pekerjaanUsers, pernikahaanUsers, role, statusAccount, imgProfile);
-                        
-                        if (statusAccount == 1) {
-                            if (role.equalsIgnoreCase("admin")) { 
-                                JOptionPane.showMessageDialog(this, "Selamat datang, " + namaUsers, "Login Berhasil", JOptionPane.INFORMATION_MESSAGE);
-                                admin.dashboardAdmin dashboardAdmin = new admin.dashboardAdmin();
-                                dashboardAdmin.setVisible(true);
-                                this.dispose();
-                            } else if (role.equalsIgnoreCase("masyarakat")) {
-                                JOptionPane.showMessageDialog(this, "Selamat datang, " + namaUsers, "Login Berhasil", JOptionPane.INFORMATION_MESSAGE);
-                                masyarakat.dashboardMasyarakat dashboardMasyarakat = new masyarakat.dashboardMasyarakat();
-                                dashboardMasyarakat.setVisible(true);
-                                this.dispose();
+                        if ("Aktif".equalsIgnoreCase(statusAccount)) {
+                            JOptionPane.showMessageDialog(this, "Selamat datang, " + namaUsers, "Login Berhasil", JOptionPane.INFORMATION_MESSAGE);
+
+                            if ("Admin".equalsIgnoreCase(role)) {
+                                new admin.dashboardAdmin().setVisible(true);
+                            } else if ("Masyarakat".equalsIgnoreCase(role)) {
+                                new masyarakat.dashboardMasyarakat().setVisible(true);
                             } else {
                                 JOptionPane.showMessageDialog(this, "Role pengguna tidak valid.", "Error", JOptionPane.ERROR_MESSAGE);
-                                inputPassword.setText("");
-                                config.userSession.getInstance().logout();
+                                return;
                             }
+                            this.dispose();
                         } else {
-                            JOptionPane.showMessageDialog(this, "Akun Anda saat ini dinonaktifkan. Silakan hubungi Administrator.", "Login Gagal: Akun Non-aktif", JOptionPane.WARNING_MESSAGE);
+                            JOptionPane.showMessageDialog(this, "Akun Anda saat ini dinonaktifkan. Silakan hubungi Administrator.", "Login Gagal", JOptionPane.WARNING_MESSAGE);
                             inputPassword.setText("");
+                            config.userSession.getInstance().logout();
                         }
                     } else {
                         JOptionPane.showMessageDialog(this, "Email atau Password salah!", "Login Gagal", JOptionPane.ERROR_MESSAGE);
-                        inputPassword.setText(""); 
+                        inputPassword.setText("");
                     }
                 } else {
                     JOptionPane.showMessageDialog(this, "Email atau Password salah!", "Login Gagal", JOptionPane.ERROR_MESSAGE);
-                    inputPassword.setText(""); 
+                    inputPassword.setText("");
                 }
             }
         } catch (SQLException e) {
-            JOptionPane.showMessageDialog(this, "Terjadi kesalahan database: Cek XAMPP dan koneksi.java. Detail: " + e.getMessage(), "Error SQL", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Database Error: " + e.getMessage(), "Error SQL", JOptionPane.ERROR_MESSAGE);
         } catch (Exception e) {
-             JOptionPane.showMessageDialog(this, "Terjadi kesalahan sistem saat login: " + e.getMessage(), "Error Sistem", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Sistem Error: " + e.getMessage(), "Error Sistem", JOptionPane.ERROR_MESSAGE);
         }
     }//GEN-LAST:event_btnSignInActionPerformed
 
