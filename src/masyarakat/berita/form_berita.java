@@ -6,6 +6,9 @@ import masyarakat.pengaduan.*;
 
 import config.userSession;
 import config.sessionValidator;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Font;
 
 import javax.swing.JFileChooser;
 import javax.swing.ImageIcon;
@@ -21,9 +24,17 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.text.SimpleDateFormat;
+import javax.swing.DefaultCellEditor;
+import javax.swing.JButton;
+import javax.swing.JCheckBox;
+import javax.swing.JLabel;
 
 import javax.swing.JOptionPane;
+import javax.swing.JTable;
+import javax.swing.SwingConstants;
+import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableCellRenderer;
 
 public class form_berita extends javax.swing.JFrame {
 
@@ -32,50 +43,90 @@ public class form_berita extends javax.swing.JFrame {
             return;
         }
         initComponents();
-        tampilDataBerita("");
+        searchingBerita("");
     }
 
-    public void tampilDataBerita(String keyword) {
-        DefaultTableModel model = new DefaultTableModel();
+    private void searchingBerita(String key) {
+        DefaultTableModel model = new DefaultTableModel() {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return column == 7;
+            }
+        };
+
+        model.addColumn("ID");
         model.addColumn("No");
-        model.addColumn("ID"); 
         model.addColumn("Judul Berita");
-        model.addColumn("Isi Berita");
-        model.addColumn("Tanggal Terbit");
-        model.addColumn("Status Publikasi");
+        model.addColumn("Kategori");
+        model.addColumn("Penulis");
+        model.addColumn("Tanggal");
+        model.addColumn("Status");
+        model.addColumn("Aksi");
 
         try {
-            String sql = "SELECT * FROM berita "
-                    + "WHERE judul_berita LIKE ? OR status_publikasi LIKE ? "
+            int no = 1;
+            String sql = "SELECT berita.*, kategori_pengaduan.nama_kategori, users.nama AS penulis "
+                    + "FROM berita "
+                    + "JOIN kategori_pengaduan ON berita.id_kategori_pengaduan = kategori_pengaduan.id_kategori_pengaduan "
+                    + "LEFT JOIN users ON berita.id_users = users.id_users "
+                    + "WHERE (judul_berita LIKE '%" + key + "%') AND status_publikasi = 'Publish' "
                     + "ORDER BY id_berita DESC";
 
             Connection conn = config.connection.getConnection();
-            PreparedStatement ps = conn.prepareStatement(sql);
-            String key = "%" + keyword + "%";
-            ps.setString(1, key);
-            ps.setString(2, key);
-            ResultSet rs = ps.executeQuery();
+            Statement st = conn.createStatement();
+            ResultSet rs = st.executeQuery(sql);
 
-            int no = 1;
             while (rs.next()) {
                 model.addRow(new Object[]{
-                    no++,
                     rs.getString("id_berita"),
+                    no++,
                     rs.getString("judul_berita"),
-                    rs.getString("isi_berita"),
+                    rs.getString("nama_kategori"),
+                    rs.getString("penulis"),
                     rs.getString("tgl_terbit"),
-                    rs.getString("status_publikasi").toUpperCase()
+                    rs.getString("status_publikasi"),
+                    "Detail"
                 });
             }
             tabelBerita.setModel(model);
-
-            tabelBerita.getColumnModel().getColumn(1).setMinWidth(0);
-            tabelBerita.getColumnModel().getColumn(1).setMaxWidth(0);
-            tabelBerita.getColumnModel().getColumn(1).setWidth(0);
-
+            tabelBerita.getColumnModel().getColumn(6).setCellRenderer(new StatusColorRenderer());
+            tabelBerita.getColumnModel().getColumn(7).setCellRenderer(new ButtonRenderer());
+            tabelBerita.getColumnModel().getColumn(7).setCellEditor(new ButtonEditor(new JCheckBox()));
+            tabelBerita.getColumnModel().getColumn(0).setMinWidth(0);
+            tabelBerita.getColumnModel().getColumn(0).setMaxWidth(0);
+            tabelBerita.setRowHeight(29);
         } catch (Exception e) {
-            JOptionPane.showMessageDialog(this, "Gagal memuat berita: " + e.getMessage());
-            e.printStackTrace();
+            System.out.println(e.getMessage());
+        }
+    }
+
+    private void showDetailDialog(String id) {
+        try {
+            String sql = "SELECT b.*, k.nama_kategori, u.nama FROM berita b "
+                    + "JOIN kategori_pengaduan k ON b.id_kategori_pengaduan = k.id_kategori_pengaduan "
+                    + "LEFT JOIN users u ON b.id_users = u.id_users WHERE b.id_berita = ?";
+            PreparedStatement ps = config.connection.getConnection().prepareStatement(sql);
+            ps.setString(1, id);
+            ResultSet rs = ps.executeQuery();
+
+            if (rs.next()) {
+                String msg = "Judul : " + rs.getString("judul_berita") + "\n"
+                        + "KAtegori Berita : " + rs.getString("nama_kategori") + "\n"
+                        + "Author : " + rs.getString("nama") + "\n"
+                        + "Tanggal : " + rs.getString("tgl_terbit") + "\n"
+                        + "Status Berita : " + rs.getString("status_publikasi") + "\n"
+                        + "Deskripsi : \n" + rs.getString("deskripsi_berita");
+
+                ImageIcon icon = null;
+                File f = new File("src/uploads/berita/" + rs.getString("gambar_berita"));
+                if (f.exists()) {
+                    icon = new ImageIcon(new ImageIcon(f.getAbsolutePath()).getImage().getScaledInstance(200, 150, Image.SCALE_SMOOTH));
+                }
+
+                JOptionPane.showMessageDialog(this, msg, "Detail Berita", JOptionPane.INFORMATION_MESSAGE, icon);
+            }
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
         }
     }
 
@@ -93,9 +144,9 @@ public class form_berita extends javax.swing.JFrame {
         btn_sign_out = new javax.swing.JButton();
         navLaporan = new javax.swing.JLabel();
         jLabel7 = new javax.swing.JLabel();
-        jScrollPane1 = new javax.swing.JScrollPane();
-        tabelBerita = new javax.swing.JTable();
         searchingBerita = new javax.swing.JTextField();
+        jScrollPane2 = new javax.swing.JScrollPane();
+        tabelBerita = new javax.swing.JTable();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -169,7 +220,7 @@ public class form_berita extends javax.swing.JFrame {
             .addGroup(jPanel2Layout.createSequentialGroup()
                 .addGap(37, 37, 37)
                 .addComponent(jLabel2)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 339, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 388, Short.MAX_VALUE)
                 .addComponent(navBeranda)
                 .addGap(45, 45, 45)
                 .addComponent(navPengaduan)
@@ -200,6 +251,12 @@ public class form_berita extends javax.swing.JFrame {
 
         jLabel7.setText("Aplikasi Layanan Pengaduan Masyakarakat Desa SukaMaju - SukaAdu");
 
+        searchingBerita.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyReleased(java.awt.event.KeyEvent evt) {
+                searchingBeritaKeyReleased(evt);
+            }
+        });
+
         tabelBerita.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
                 {null, null, null, null},
@@ -211,7 +268,7 @@ public class form_berita extends javax.swing.JFrame {
                 "Title 1", "Title 2", "Title 3", "Title 4"
             }
         ));
-        jScrollPane1.setViewportView(tabelBerita);
+        jScrollPane2.setViewportView(tabelBerita);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -220,13 +277,15 @@ public class form_berita extends javax.swing.JFrame {
             .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
             .addGroup(layout.createSequentialGroup()
                 .addGap(90, 90, 90)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(searchingBerita, javax.swing.GroupLayout.PREFERRED_SIZE, 338, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addComponent(jLabel7)
-                        .addComponent(jLabel1)
-                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 949, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addGap(0, 0, Short.MAX_VALUE))
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                    .addComponent(searchingBerita, javax.swing.GroupLayout.PREFERRED_SIZE, 313, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addGroup(layout.createSequentialGroup()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jLabel7)
+                            .addComponent(jLabel1))
+                        .addGap(544, 544, 544))
+                    .addComponent(jScrollPane2, javax.swing.GroupLayout.Alignment.LEADING))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -236,11 +295,11 @@ public class form_berita extends javax.swing.JFrame {
                 .addComponent(jLabel1)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jLabel7)
-                .addGap(34, 34, 34)
+                .addGap(38, 38, 38)
                 .addComponent(searchingBerita, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 380, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(0, 54, Short.MAX_VALUE))
+                .addGap(30, 30, 30)
+                .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 376, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(40, Short.MAX_VALUE))
         );
 
         pack();
@@ -316,35 +375,11 @@ public class form_berita extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_navLaporanMouseClicked
 
-    /**
-     * @param args the command line arguments
-     */
-    public static void main(String args[]) {
-        /* Set the Nimbus look and feel */
-        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
-        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
-         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
-         */
-        try {
-            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
-                if ("Nimbus".equals(info.getName())) {
-                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
-                    break;
-                }
-            }
-        } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(form_berita.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(form_berita.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(form_berita.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(form_berita.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        }
-        //</editor-fold>
-        //</editor-fold>
+    private void searchingBeritaKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_searchingBeritaKeyReleased
+        searchingBerita(searchingBerita.getText());
+    }//GEN-LAST:event_searchingBeritaKeyReleased
 
-        /* Create and display the form */
+    public static void main(String args[]) {
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
                 new form_berita().setVisible(true);
@@ -358,7 +393,7 @@ public class form_berita extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel7;
     private javax.swing.JPanel jPanel2;
-    private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JLabel navBeranda;
     private javax.swing.JLabel navBerita;
     private javax.swing.JLabel navLaporan;
@@ -367,4 +402,72 @@ public class form_berita extends javax.swing.JFrame {
     private javax.swing.JTextField searchingBerita;
     private javax.swing.JTable tabelBerita;
     // End of variables declaration//GEN-END:variables
+
+    class StatusColorRenderer extends DefaultTableCellRenderer {
+
+        @Override
+        public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+            Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+
+            ((JLabel) c).setOpaque(true);
+
+            String status = (value != null) ? value.toString() : "";
+
+            if ("Publish".equalsIgnoreCase(status)) {
+                c.setBackground(new Color(0, 153, 0));
+                c.setForeground(Color.WHITE);
+                c.setFont(c.getFont().deriveFont(Font.BOLD));
+            }
+
+            if (isSelected) {
+                c.setBackground(c.getBackground().darker());
+            }
+            setHorizontalAlignment(SwingConstants.CENTER);
+            return c;
+        }
+    }
+
+    class ButtonRenderer extends JButton implements TableCellRenderer {
+
+        public ButtonRenderer() {
+            setOpaque(true);
+        }
+
+        @Override
+        public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+            setText((value == null) ? "" : value.toString());
+            return this;
+        }
+    }
+
+    class ButtonEditor extends DefaultCellEditor {
+
+        protected JButton button;
+        private String label;
+        private JTable table;
+
+        public ButtonEditor(JCheckBox checkBox) {
+            super(checkBox);
+            button = new JButton();
+            button.setOpaque(true);
+            button.addActionListener(e -> fireEditingStopped());
+        }
+
+        @Override
+        public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row, int column) {
+            this.table = table;
+            label = (value == null) ? "" : value.toString();
+            button.setText(label);
+            return button;
+        }
+
+        @Override
+        public Object getCellEditorValue() {
+            int row = table.getSelectedRow();
+            String id = table.getValueAt(row, 0).toString();
+            showDetailDialog(id);
+            return label;
+        }
+    }
+
 }

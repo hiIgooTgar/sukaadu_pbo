@@ -172,6 +172,7 @@
         </Property>
       </Properties>
       <AuxValues>
+        <AuxValue name="JavaCodeGenerator_SerializeTo" type="java.lang.String" value="form_pengaduan_selectKategori"/>
         <AuxValue name="JavaCodeGenerator_TypeParameters" type="java.lang.String" value="&lt;kategoriPengaduan&gt;"/>
       </AuxValues>
     </Component>
