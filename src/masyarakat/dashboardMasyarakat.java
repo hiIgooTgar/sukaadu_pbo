@@ -90,6 +90,7 @@ public class dashboardMasyarakat extends javax.swing.JFrame {
         });
 
         btn_sign_out.setFont(new java.awt.Font("Tahoma", 0, 18)); // NOI18N
+        btn_sign_out.setIcon(new javax.swing.ImageIcon(getClass().getResource("/assets/icon/mdi--sign-out.png"))); // NOI18N
         btn_sign_out.setText("Logout");
         btn_sign_out.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -113,7 +114,7 @@ public class dashboardMasyarakat extends javax.swing.JFrame {
             .addGroup(jPanel2Layout.createSequentialGroup()
                 .addGap(37, 37, 37)
                 .addComponent(jLabel2)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 315, Short.MAX_VALUE)
                 .addComponent(navBeranda)
                 .addGap(45, 45, 45)
                 .addComponent(navPengaduan)
@@ -157,6 +158,7 @@ public class dashboardMasyarakat extends javax.swing.JFrame {
         btnForm.setBackground(new java.awt.Color(0, 153, 255));
         btnForm.setFont(new java.awt.Font("Tahoma", 0, 17)); // NOI18N
         btnForm.setForeground(new java.awt.Color(255, 255, 255));
+        btnForm.setIcon(new javax.swing.ImageIcon(getClass().getResource("/assets/icon/clarity--form-line.png"))); // NOI18N
         btnForm.setText("Formulir Pengaduan");
         btnForm.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -170,7 +172,7 @@ public class dashboardMasyarakat extends javax.swing.JFrame {
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
             .addGroup(layout.createSequentialGroup()
-                .addGap(81, 81, 81)
+                .addGap(93, 93, 93)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(btnForm, javax.swing.GroupLayout.PREFERRED_SIZE, 260, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel10)
@@ -178,7 +180,7 @@ public class dashboardMasyarakat extends javax.swing.JFrame {
                     .addComponent(jLabel7)
                     .addComponent(label_name)
                     .addComponent(jLabel11))
-                .addContainerGap(276, Short.MAX_VALUE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
