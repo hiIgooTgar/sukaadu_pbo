@@ -132,7 +132,7 @@ public class form_berita extends javax.swing.JFrame {
 
             if (rs.next()) {
                 String msg = "Judul : " + rs.getString("judul_berita") + "\n"
-                        + "KAtegori Berita : " + rs.getString("nama_kategori") + "\n"
+                        + "Kategori Berita : " + rs.getString("nama_kategori") + "\n"
                         + "Author : " + rs.getString("nama") + "\n"
                         + "Tanggal : " + rs.getString("tgl_terbit") + "\n"
                         + "Status Berita : " + rs.getString("status_publikasi") + "\n"
@@ -218,6 +218,7 @@ public class form_berita extends javax.swing.JFrame {
         jLabel26 = new javax.swing.JLabel();
         jLabel27 = new javax.swing.JLabel();
         jLabel28 = new javax.swing.JLabel();
+        btnReportNews = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -513,6 +514,17 @@ public class form_berita extends javax.swing.JFrame {
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
+        btnReportNews.setBackground(new java.awt.Color(255, 0, 51));
+        btnReportNews.setFont(new java.awt.Font("Tahoma", 0, 17)); // NOI18N
+        btnReportNews.setForeground(new java.awt.Color(255, 255, 255));
+        btnReportNews.setIcon(new javax.swing.ImageIcon(getClass().getResource("/assets/icon/akar-icons--file-white.png"))); // NOI18N
+        btnReportNews.setText("PDF");
+        btnReportNews.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnReportNewsActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -521,7 +533,10 @@ public class form_berita extends javax.swing.JFrame {
                 .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 69, Short.MAX_VALUE)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(searchingBerita, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 313, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                        .addComponent(btnReportNews, javax.swing.GroupLayout.PREFERRED_SIZE, 111, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(18, 18, 18)
+                        .addComponent(searchingBerita, javax.swing.GroupLayout.PREFERRED_SIZE, 313, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                         .addComponent(jLabel8)
                         .addComponent(jLabel3)
@@ -567,7 +582,7 @@ public class form_berita extends javax.swing.JFrame {
                 .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 56, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 55, Short.MAX_VALUE)
                         .addComponent(jLabel8)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jLabel3)
@@ -606,7 +621,9 @@ public class form_berita extends javax.swing.JFrame {
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 139, javax.swing.GroupLayout.PREFERRED_SIZE)))
                         .addGap(42, 42, 42)
-                        .addComponent(searchingBerita, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(searchingBerita, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(btnReportNews, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addGap(30, 30, 30)
                         .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 151, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addContainerGap())
@@ -625,7 +642,7 @@ public class form_berita extends javax.swing.JFrame {
 
         if (fc.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
             fileGambar = fc.getSelectedFile();
-            namaFileGambar = System.currentTimeMillis() + "_" + fileGambar.getName();
+            namaFileGambar = "berita_" + System.currentTimeMillis() + "_" + fileGambar.getName();
 
             try {
                 ImageIcon icon = new ImageIcon(fileGambar.getAbsolutePath());
@@ -866,9 +883,9 @@ public class form_berita extends javax.swing.JFrame {
 
     private void btn_sign_out1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_sign_out1ActionPerformed
         int confirm = JOptionPane.showConfirmDialog(this,
-            "Apakah Anda yakin ingin Logout?",
-            "Konfirmasi Logout",
-            JOptionPane.YES_NO_OPTION);
+                "Apakah Anda yakin ingin Logout?",
+                "Konfirmasi Logout",
+                JOptionPane.YES_NO_OPTION);
 
         if (confirm == JOptionPane.YES_OPTION) {
             config.userSession.getInstance().logout();
@@ -878,8 +895,8 @@ public class form_berita extends javax.swing.JFrame {
                 this.dispose();
             } catch (Exception e) {
                 JOptionPane.showMessageDialog(this,
-                    "Gagal redirect ke halaman login: " + e.getMessage(),
-                    "Error", JOptionPane.ERROR_MESSAGE);
+                        "Gagal redirect ke halaman login: " + e.getMessage(),
+                        "Error", JOptionPane.ERROR_MESSAGE);
             }
         }
     }//GEN-LAST:event_btn_sign_out1ActionPerformed
@@ -906,13 +923,28 @@ public class form_berita extends javax.swing.JFrame {
 
     private void navLaporan1MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_navLaporan1MouseClicked
         try {
-            admin.rekap_laporan.form_rekap_laporan rekapLaporanForm = new  admin.rekap_laporan.form_rekap_laporan();
+            admin.rekap_laporan.form_rekap_laporan rekapLaporanForm = new admin.rekap_laporan.form_rekap_laporan();
             rekapLaporanForm.setVisible(true);
             this.dispose();
         } catch (Exception e) {
             JOptionPane.showMessageDialog(this, "Gagal membuka form rekap laporan : " + e.getMessage(), "Error Redirect", JOptionPane.ERROR_MESSAGE);
         }
     }//GEN-LAST:event_navLaporan1MouseClicked
+
+    private void btnReportNewsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnReportNewsActionPerformed
+        javax.swing.JFileChooser chooser = new javax.swing.JFileChooser();
+        chooser.setDialogTitle("Save Laporan Berita");
+
+        if (chooser.showSaveDialog(this) == javax.swing.JFileChooser.APPROVE_OPTION) {
+            String path = chooser.getSelectedFile().getAbsolutePath();
+            if (!path.endsWith(".pdf")) {
+                path += ".pdf";
+            }
+            DefaultTableModel model = (DefaultTableModel) tabelBerita.getModel();
+            laporanGeneratorBerita.cetakLaporan(model, path);
+            javax.swing.JOptionPane.showMessageDialog(this, "Laporan Berita Pengaduan PDF Berhasil Dibuat!");
+        }
+    }//GEN-LAST:event_btnReportNewsActionPerformed
 
     public static void main(String args[]) {
         java.awt.EventQueue.invokeLater(new Runnable() {
@@ -925,6 +957,7 @@ public class form_berita extends javax.swing.JFrame {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnAdd;
     private javax.swing.JButton btnDelete;
+    private javax.swing.JButton btnReportNews;
     private javax.swing.JButton btnUpdate;
     private javax.swing.JButton btn_sign_out1;
     private javax.swing.JButton chooseGambar;

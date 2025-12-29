@@ -97,6 +97,7 @@ public class form_kategori extends javax.swing.JFrame {
         jLabel20 = new javax.swing.JLabel();
         jLabel21 = new javax.swing.JLabel();
         jLabel22 = new javax.swing.JLabel();
+        btnReportKategori = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -376,6 +377,17 @@ public class form_kategori extends javax.swing.JFrame {
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
+        btnReportKategori.setBackground(new java.awt.Color(255, 0, 51));
+        btnReportKategori.setFont(new java.awt.Font("Tahoma", 0, 17)); // NOI18N
+        btnReportKategori.setForeground(new java.awt.Color(255, 255, 255));
+        btnReportKategori.setIcon(new javax.swing.ImageIcon(getClass().getResource("/assets/icon/akar-icons--file-white.png"))); // NOI18N
+        btnReportKategori.setText("PDF");
+        btnReportKategori.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnReportKategoriActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -401,7 +413,9 @@ public class form_kategori extends javax.swing.JFrame {
                         .addGap(39, 39, 39)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(layout.createSequentialGroup()
-                                .addGap(319, 319, 319)
+                                .addGap(202, 202, 202)
+                                .addComponent(btnReportKategori, javax.swing.GroupLayout.PREFERRED_SIZE, 102, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                                 .addComponent(inputSearching, javax.swing.GroupLayout.PREFERRED_SIZE, 273, javax.swing.GroupLayout.PREFERRED_SIZE))
                             .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 592, javax.swing.GroupLayout.PREFERRED_SIZE)))
                     .addComponent(jLabel8)
@@ -422,8 +436,10 @@ public class form_kategori extends javax.swing.JFrame {
                         .addComponent(jLabel8)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jLabel3)
-                        .addGap(36, 36, 36)
-                        .addComponent(inputSearching, javax.swing.GroupLayout.PREFERRED_SIZE, 39, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(35, 35, 35)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(inputSearching, javax.swing.GroupLayout.PREFERRED_SIZE, 39, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(btnReportKategori, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addGap(26, 26, 26)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(layout.createSequentialGroup()
@@ -622,9 +638,9 @@ public class form_kategori extends javax.swing.JFrame {
 
     private void btn_sign_outActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_sign_outActionPerformed
         int confirm = JOptionPane.showConfirmDialog(this,
-            "Apakah Anda yakin ingin Logout?",
-            "Konfirmasi Logout",
-            JOptionPane.YES_NO_OPTION);
+                "Apakah Anda yakin ingin Logout?",
+                "Konfirmasi Logout",
+                JOptionPane.YES_NO_OPTION);
 
         if (confirm == JOptionPane.YES_OPTION) {
             config.userSession.getInstance().logout();
@@ -634,8 +650,8 @@ public class form_kategori extends javax.swing.JFrame {
                 this.dispose();
             } catch (Exception e) {
                 JOptionPane.showMessageDialog(this,
-                    "Gagal redirect ke halaman login: " + e.getMessage(),
-                    "Error", JOptionPane.ERROR_MESSAGE);
+                        "Gagal redirect ke halaman login: " + e.getMessage(),
+                        "Error", JOptionPane.ERROR_MESSAGE);
             }
         }
     }//GEN-LAST:event_btn_sign_outActionPerformed
@@ -662,13 +678,27 @@ public class form_kategori extends javax.swing.JFrame {
 
     private void navLaporanMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_navLaporanMouseClicked
         try {
-            admin.rekap_laporan.form_rekap_laporan rekapLaporanForm = new  admin.rekap_laporan.form_rekap_laporan();
+            admin.rekap_laporan.form_rekap_laporan rekapLaporanForm = new admin.rekap_laporan.form_rekap_laporan();
             rekapLaporanForm.setVisible(true);
             this.dispose();
         } catch (Exception e) {
             JOptionPane.showMessageDialog(this, "Gagal membuka form rekap laporan : " + e.getMessage(), "Error Redirect", JOptionPane.ERROR_MESSAGE);
         }
     }//GEN-LAST:event_navLaporanMouseClicked
+
+    private void btnReportKategoriActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnReportKategoriActionPerformed
+        javax.swing.JFileChooser chooser = new javax.swing.JFileChooser();
+        chooser.setDialogTitle("Save Laporan Data Kategori Pengaduan");
+        if (chooser.showSaveDialog(this) == javax.swing.JFileChooser.APPROVE_OPTION) {
+            String path = chooser.getSelectedFile().getAbsolutePath();
+            if (!path.endsWith(".pdf")) {
+                path += ".pdf";
+            }
+
+            laporanGeneratorKategori.cetakLaporan((DefaultTableModel) tabelKategoriPengaduan.getModel(), path);
+            javax.swing.JOptionPane.showMessageDialog(this, "Laporan Data Kategori Pengaduan PDF Berhasil Dibuat!");
+        }
+    }//GEN-LAST:event_btnReportKategoriActionPerformed
 
     public static void main(String args[]) {
         java.awt.EventQueue.invokeLater(new Runnable() {
@@ -682,6 +712,7 @@ public class form_kategori extends javax.swing.JFrame {
     private javax.swing.JButton btnAdd;
     private javax.swing.JButton btnClear;
     private javax.swing.JButton btnDelete;
+    private javax.swing.JButton btnReportKategori;
     private javax.swing.JButton btnUpdate;
     private javax.swing.JButton btn_sign_out;
     private javax.swing.JTextField inputNamaKategori;

@@ -137,7 +137,7 @@ public class form_users extends javax.swing.JFrame {
         } catch (Exception e) {
             System.err.println("Error getOldFoto: " + e.getMessage());
         }
-        return "default_profile.jpg"; 
+        return "default_profile.jpg";
     }
 
     private void loadGambarProfil(String id) {
@@ -261,6 +261,7 @@ public class form_users extends javax.swing.JFrame {
         jLabel24 = new javax.swing.JLabel();
         jLabel25 = new javax.swing.JLabel();
         jLabel26 = new javax.swing.JLabel();
+        btnReportUsers = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -625,6 +626,17 @@ public class form_users extends javax.swing.JFrame {
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
+        btnReportUsers.setBackground(new java.awt.Color(255, 0, 51));
+        btnReportUsers.setFont(new java.awt.Font("Tahoma", 0, 17)); // NOI18N
+        btnReportUsers.setForeground(new java.awt.Color(255, 255, 255));
+        btnReportUsers.setIcon(new javax.swing.ImageIcon(getClass().getResource("/assets/icon/akar-icons--file-white.png"))); // NOI18N
+        btnReportUsers.setText("PDF");
+        btnReportUsers.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnReportUsersActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -713,7 +725,10 @@ public class form_users extends javax.swing.JFrame {
                                         .addGap(18, 18, 18)
                                         .addComponent(btnClear, javax.swing.GroupLayout.PREFERRED_SIZE, 157, javax.swing.GroupLayout.PREFERRED_SIZE)))))
                         .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 1010, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(inputSearching, javax.swing.GroupLayout.PREFERRED_SIZE, 294, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGroup(layout.createSequentialGroup()
+                            .addComponent(btnReportUsers, javax.swing.GroupLayout.PREFERRED_SIZE, 102, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addGap(18, 18, 18)
+                            .addComponent(inputSearching, javax.swing.GroupLayout.PREFERRED_SIZE, 294, javax.swing.GroupLayout.PREFERRED_SIZE)))
                     .addGroup(layout.createSequentialGroup()
                         .addGap(2, 2, 2)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -814,8 +829,10 @@ public class form_users extends javax.swing.JFrame {
                                     .addComponent(btnUpdate, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
                                     .addComponent(btnDelete, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
                                     .addComponent(btnClear, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE))))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 64, Short.MAX_VALUE)
-                        .addComponent(inputSearching, javax.swing.GroupLayout.PREFERRED_SIZE, 39, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 63, Short.MAX_VALUE)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(inputSearching, javax.swing.GroupLayout.PREFERRED_SIZE, 39, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(btnReportUsers, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addGap(29, 29, 29)
                         .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 206, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(57, 57, 57))))
@@ -1256,9 +1273,9 @@ public class form_users extends javax.swing.JFrame {
 
     private void btn_sign_outActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_sign_outActionPerformed
         int confirm = JOptionPane.showConfirmDialog(this,
-            "Apakah Anda yakin ingin Logout?",
-            "Konfirmasi Logout",
-            JOptionPane.YES_NO_OPTION);
+                "Apakah Anda yakin ingin Logout?",
+                "Konfirmasi Logout",
+                JOptionPane.YES_NO_OPTION);
 
         if (confirm == JOptionPane.YES_OPTION) {
             config.userSession.getInstance().logout();
@@ -1268,8 +1285,8 @@ public class form_users extends javax.swing.JFrame {
                 this.dispose();
             } catch (Exception e) {
                 JOptionPane.showMessageDialog(this,
-                    "Gagal redirect ke halaman login: " + e.getMessage(),
-                    "Error", JOptionPane.ERROR_MESSAGE);
+                        "Gagal redirect ke halaman login: " + e.getMessage(),
+                        "Error", JOptionPane.ERROR_MESSAGE);
             }
         }
     }//GEN-LAST:event_btn_sign_outActionPerformed
@@ -1296,13 +1313,27 @@ public class form_users extends javax.swing.JFrame {
 
     private void navLaporanMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_navLaporanMouseClicked
         try {
-            admin.rekap_laporan.form_rekap_laporan rekapLaporanForm = new  admin.rekap_laporan.form_rekap_laporan();
+            admin.rekap_laporan.form_rekap_laporan rekapLaporanForm = new admin.rekap_laporan.form_rekap_laporan();
             rekapLaporanForm.setVisible(true);
             this.dispose();
         } catch (Exception e) {
             JOptionPane.showMessageDialog(this, "Gagal membuka form rekap laporan : " + e.getMessage(), "Error Redirect", JOptionPane.ERROR_MESSAGE);
         }
     }//GEN-LAST:event_navLaporanMouseClicked
+
+    private void btnReportUsersActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnReportUsersActionPerformed
+        javax.swing.JFileChooser chooser = new javax.swing.JFileChooser();
+        chooser.setDialogTitle("Save Laporan Data Users");
+        if (chooser.showSaveDialog(this) == javax.swing.JFileChooser.APPROVE_OPTION) {
+            String path = chooser.getSelectedFile().getAbsolutePath();
+            if (!path.endsWith(".pdf")) {
+                path += ".pdf";
+            }
+
+            laporanGeneratorUsers.cetakLaporan((DefaultTableModel) tabelUsers.getModel(), path);
+            javax.swing.JOptionPane.showMessageDialog(this, "Laporan Data Users PDF Berhasil Dibuat!");
+        }
+    }//GEN-LAST:event_btnReportUsersActionPerformed
 
     public static void main(String args[]) {
         java.awt.EventQueue.invokeLater(new Runnable() {
@@ -1317,6 +1348,7 @@ public class form_users extends javax.swing.JFrame {
     private javax.swing.JButton btnClear;
     private javax.swing.JButton btnDelete;
     private javax.swing.JButton btnProfileChoose;
+    private javax.swing.JButton btnReportUsers;
     private javax.swing.JButton btnUpdate;
     private javax.swing.JButton btn_sign_out;
     private javax.swing.JComboBox<String> inputAgama;

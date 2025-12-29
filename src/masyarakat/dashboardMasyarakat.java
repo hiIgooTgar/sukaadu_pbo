@@ -159,7 +159,7 @@ public class dashboardMasyarakat extends javax.swing.JFrame {
         btnForm.setFont(new java.awt.Font("Tahoma", 0, 17)); // NOI18N
         btnForm.setForeground(new java.awt.Color(255, 255, 255));
         btnForm.setIcon(new javax.swing.ImageIcon(getClass().getResource("/assets/icon/clarity--form-line.png"))); // NOI18N
-        btnForm.setText("Formulir Pengaduan");
+        btnForm.setText("Ajukan Pengaduan");
         btnForm.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnFormActionPerformed(evt);

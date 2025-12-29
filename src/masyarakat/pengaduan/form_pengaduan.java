@@ -54,6 +54,26 @@ public class form_pengaduan extends javax.swing.JFrame {
             JOptionPane.showMessageDialog(this, "Gagal memuat kategori: " + e.getMessage());
         }
     }
+    
+    private void redirectToLaporanPengaduan() {
+        try {
+            masyarakat.laporan.form_laporan laporanPengaduanForm = new masyarakat.laporan.form_laporan();
+            laporanPengaduanForm.setVisible(true);
+            this.dispose();
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "Gagal redirect ke pengaduan: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+    
+     private void redirectToProfile() {
+        try {
+            masyarakat.profile.form_profile profileForm = new masyarakat.profile.form_profile();
+            profileForm.setVisible(true);
+            this.dispose();
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "Gagal redirect ke profile: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
 
     private void resetForm() {
         inputJudul.setText("");
@@ -343,6 +363,7 @@ public class form_pengaduan extends javax.swing.JFrame {
                         "Profil Anda belum lengkap.\n"
                         + "Silakan lengkapi profil Anda terlebih dahulu di menu Profile.",
                         "Akses Ditolak", JOptionPane.ERROR_MESSAGE);
+                redirectToProfile();
                 return; 
             }
 
@@ -397,7 +418,7 @@ public class form_pengaduan extends javax.swing.JFrame {
             ps.executeUpdate();
 
             JOptionPane.showMessageDialog(this, "Pengaduan Berhasil Terkirim!");
-            resetForm();
+            redirectToLaporanPengaduan();
 
         } catch (Exception e) {
             JOptionPane.showMessageDialog(this, "Error: " + e.getMessage());
@@ -412,7 +433,7 @@ public class form_pengaduan extends javax.swing.JFrame {
 
         if (fc.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
             fileFoto = fc.getSelectedFile();
-            namaFileFoto = System.currentTimeMillis() + "_" + fileFoto.getName();
+            namaFileFoto = "pengaduan_" + System.currentTimeMillis() + "_" + fileFoto.getName();
 
             try {
                 ImageIcon icon = new ImageIcon(fileFoto.getAbsolutePath());

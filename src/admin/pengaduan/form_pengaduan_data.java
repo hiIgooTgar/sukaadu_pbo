@@ -13,6 +13,7 @@ import java.awt.Component;
 import javax.swing.*;
 import javax.swing.table.*;
 import java.awt.*;
+import java.io.File;
 import java.sql.*;
 
 public class form_pengaduan_data extends javax.swing.JFrame {
@@ -26,24 +27,18 @@ public class form_pengaduan_data extends javax.swing.JFrame {
     }
 
     public void tampilDataAdmin(String keyword) {
-        DefaultTableModel model = new DefaultTableModel() {
-            @Override
-            public boolean isCellEditable(int row, int column) {
-                return column == 9 || column == 10;
-            }
+        String[] columnNames = {
+            "No", "ID", "Tanggal", "Nama Pengadu", "Judul",
+            "Deskripsi", "Kategori", "Status", "Tanggapan",
+            "Foto", "Aksi Tanggapan", "Aksi"
         };
 
-        model.addColumn("No");
-        model.addColumn("ID"); 
-        model.addColumn("Tanggal");
-        model.addColumn("Nama Pengadu");
-        model.addColumn("Judul");
-        model.addColumn("Kategori"); 
-        model.addColumn("Status");
-        model.addColumn("Tanggapan");
-        model.addColumn("Foto"); 
-        model.addColumn("Aksi");
-        model.addColumn("Detail");
+        DefaultTableModel model = new DefaultTableModel(columnNames, 0) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return column == 10 || column == 11;
+            }
+        };
 
         try {
             String sql = "SELECT p.*, u.nama, k.nama_kategori, t.isi_tanggapan "
@@ -62,9 +57,17 @@ public class form_pengaduan_data extends javax.swing.JFrame {
 
             int no = 1;
             while (rs.next()) {
-                String status = rs.getString("status").toLowerCase();
-                String labelAksi = status.equals("belum") ? "Konfirmasi"
-                        : status.equals("proses") ? "Tanggapi" : status.toUpperCase();
+                String statusRaw = rs.getString("status");
+                String status = (statusRaw != null) ? statusRaw.toLowerCase() : "belum";
+
+                String labelAksi;
+                if (status.equals("belum")) {
+                    labelAksi = "Konfirmasi";
+                } else if (status.equals("proses")) {
+                    labelAksi = "Tanggapi";
+                } else {
+                    labelAksi = status.toUpperCase();
+                }
 
                 model.addRow(new Object[]{
                     no++,
@@ -72,25 +75,32 @@ public class form_pengaduan_data extends javax.swing.JFrame {
                     rs.getString("tgl_pegaduan"),
                     rs.getString("nama"),
                     rs.getString("judul_pengaduan"),
-                    rs.getString("nama_kategori"), 
+                    rs.getString("deskripsi_pengaduan"),
+                    rs.getString("nama_kategori"),
                     status.toUpperCase(),
                     rs.getString("isi_tanggapan") == null ? "-" : rs.getString("isi_tanggapan"),
                     rs.getString("foto_pengaduan"),
                     labelAksi,
-                    "Show"
+                    "Detail"
                 });
             }
+
             tabelDataPengaduan.setModel(model);
+            tabelDataPengaduan.getColumnModel().getColumn(1).setMinWidth(0);
+            tabelDataPengaduan.getColumnModel().getColumn(1).setMaxWidth(0);
+            tabelDataPengaduan.getColumnModel().getColumn(1).setPreferredWidth(0);
+            tabelDataPengaduan.getColumnModel().getColumn(9).setMinWidth(0);
+            tabelDataPengaduan.getColumnModel().getColumn(9).setMaxWidth(0);
+            tabelDataPengaduan.getColumnModel().getColumn(9).setPreferredWidth(0);
 
-            setColumnWidth(1, 0);
-            setColumnWidth(8, 0);
-
-            tabelDataPengaduan.getColumnModel().getColumn(9).setCellRenderer(new ButtonRenderer());
-            tabelDataPengaduan.getColumnModel().getColumn(9).setCellEditor(new ButtonEditor(new JCheckBox()));
             tabelDataPengaduan.getColumnModel().getColumn(10).setCellRenderer(new ButtonRenderer());
             tabelDataPengaduan.getColumnModel().getColumn(10).setCellEditor(new ButtonEditor(new JCheckBox()));
+            tabelDataPengaduan.getColumnModel().getColumn(11).setCellRenderer(new ButtonRenderer());
+            tabelDataPengaduan.getColumnModel().getColumn(11).setCellEditor(new ButtonEditor(new JCheckBox()));
 
             tabelDataPengaduan.setRowHeight(35);
+            tabelDataPengaduan.getTableHeader().setReorderingAllowed(false);
+
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -104,28 +114,66 @@ public class form_pengaduan_data extends javax.swing.JFrame {
 
     private void showDetailPengaduan(int row) {
         String id = tabelDataPengaduan.getValueAt(row, 1).toString();
+        String tanggal = tabelDataPengaduan.getValueAt(row, 2).toString();
         String nama = tabelDataPengaduan.getValueAt(row, 3).toString();
         String judul = tabelDataPengaduan.getValueAt(row, 4).toString();
-        String kategori = tabelDataPengaduan.getValueAt(row, 5).toString();
-        String status = tabelDataPengaduan.getValueAt(row, 6).toString();
-        String fotoName = tabelDataPengaduan.getValueAt(row, 8).toString();
+        String deskripsi = tabelDataPengaduan.getValueAt(row, 5).toString();
+        String kategori = tabelDataPengaduan.getValueAt(row, 6).toString();
+        String status = tabelDataPengaduan.getValueAt(row, 7).toString();
+        String fotoName = tabelDataPengaduan.getValueAt(row, 9).toString();
 
-        JPanel panel = new JPanel(new BorderLayout(10, 10));
-        String info = "<html><b>ID Pengaduan : </b> " + id + "<br><b>Nama : </b> " + nama + "<br><b>Kategori Pengaduan : </b> " + kategori
-                + "<br><b>Judul Pengaduan : </b> " + judul + "<br><b>Status Pengaduan : </b> " + status + "</html>";
+        String isiTanggapan = "<p style='color:red;'>Belum ada tanggapan dari admin.</p>";
 
-        JLabel labelFoto = new JLabel();
         try {
-            ImageIcon icon = new ImageIcon("src/uploads/pengaduan/" + fotoName);
-            Image img = icon.getImage().getScaledInstance(300, 200, Image.SCALE_SMOOTH);
-            labelFoto.setIcon(new ImageIcon(img));
+            String sql = "SELECT isi_tanggapan FROM tanggapan WHERE id_pengaduan = ?";
+            Connection conn = config.connection.getConnection();
+            PreparedStatement ps = conn.prepareStatement(sql);
+            ps.setString(1, id);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                isiTanggapan = rs.getString("isi_tanggapan");
+            }
         } catch (Exception e) {
-            labelFoto.setText("Gambar tidak tersedia");
+            System.out.println("Error ambil tanggapan: " + e.getMessage());
         }
 
-        panel.add(new JLabel(info), BorderLayout.NORTH);
+        JPanel panel = new JPanel(new BorderLayout(10, 10));
+        String info = "<html>"
+                + "<body style='width: 380px;'>"
+                + "<h3>Detail Pengaduan</h3>"
+                + "<b>ID Pengaduan :</b> " + id + "<br>"
+                + "<b>Tanggal Pengaduan :</b> " + tanggal + "<br>"
+                + "<b>Nama Pengadu :</b> " + nama + "<br>"
+                + "<b>Kategori :</b> " + kategori + "<br>"
+                + "<b>Status :</b> " + status + "<br><br>"
+                + "<b>Judul :</b> " + judul + "<br>"
+                + "<p><b>Deskripsi :</b><br>" + deskripsi + "</p>"
+                + "<hr>"
+                + "<div style='background-color: #f2f2f2; padding: 6px 0;'>"
+                + "<b>Tanggapan Admin :</b><br>" + isiTanggapan
+                + "</div>"
+                + "</body></html>";
+
+        JLabel labelInfo = new JLabel(info);
+
+        JLabel labelFoto = new JLabel();
+        labelFoto.setHorizontalAlignment(JLabel.CENTER);
+        try {
+            File f = new File("src/uploads/pengaduan/" + fotoName);
+            if (f.exists()) {
+                ImageIcon icon = new ImageIcon(f.getAbsolutePath());
+                Image img = icon.getImage().getScaledInstance(350, 250, Image.SCALE_SMOOTH);
+                labelFoto.setIcon(new ImageIcon(img));
+            } else {
+                labelFoto.setText("<html><p style='color:red;'>File gambar tidak ditemukan di folder uploads.</p></html>");
+            }
+        } catch (Exception e) {
+            labelFoto.setText("Gagal memuat gambar.");
+        }
+
+        panel.add(labelInfo, BorderLayout.NORTH);
         panel.add(labelFoto, BorderLayout.CENTER);
-        JOptionPane.showMessageDialog(this, panel, "Detail Pengaduan", JOptionPane.PLAIN_MESSAGE);
+        JOptionPane.showMessageDialog(this, panel, "Detail Pengaduan Lengkap", JOptionPane.PLAIN_MESSAGE);
     }
 
     private void updateStatus(String id, String status) {
@@ -136,38 +184,73 @@ public class form_pengaduan_data extends javax.swing.JFrame {
             ps.setString(1, status);
             ps.setString(2, id);
             ps.executeUpdate();
-            tampilDataAdmin(""); 
+            tampilDataAdmin("");
         } catch (Exception e) {
             JOptionPane.showMessageDialog(this, "Gagal update status: " + e.getMessage());
         }
     }
 
     private void bukaPopupTanggapan(String id) {
-        JTextArea textArea = new JTextArea(6, 25);
-        textArea.setLineWrap(true);
-        textArea.setWrapStyleWord(true);
-        JScrollPane scrollPane = new JScrollPane(textArea);
+        try {
+            String sqlInfo = "SELECT judul_pengaduan FROM pengaduan WHERE id_pengaduan = ?";
+            Connection conn = config.connection.getConnection();
+            PreparedStatement psInfo = conn.prepareStatement(sqlInfo);
+            psInfo.setString(1, id);
+            ResultSet rs = psInfo.executeQuery();
 
-        int result = JOptionPane.showConfirmDialog(null, scrollPane,
-                "Input Tanggapan Selesai (ID Pengaduan: " + id + ")",
-                JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
-
-        if (result == JOptionPane.OK_OPTION && !textArea.getText().trim().isEmpty()) {
-            try {
-                String sql = "INSERT INTO tanggapan (id_pengaduan, tgl_tanggapan, isi_tanggapan, id_users) VALUES (?, NOW(), ?, ?)";
-                Connection conn = config.connection.getConnection();
-                PreparedStatement ps = conn.prepareStatement(sql);
-                ps.setString(1, id);
-                ps.setString(2, textArea.getText().trim());
-                ps.setInt(3, config.userSession.getInstance().getIdUsers());
-
-                if (ps.executeUpdate() > 0) {
-                    updateStatus(id, "selesai");
-                    JOptionPane.showMessageDialog(null, "Tanggapan berhasil disimpan!");
-                }
-            } catch (Exception e) {
-                JOptionPane.showMessageDialog(null, "Error simpan tanggapan: " + e.getMessage());
+            String judul = "";
+            if (rs.next()) {
+                judul = rs.getString("judul_pengaduan");
             }
+
+            JPanel panel = new JPanel(new BorderLayout(5, 10));
+
+            String htmlInfo = "<html>"
+                    + "<body style='width: 320px;'>"
+                    + "<b>Judul pengaduan :</b> " + judul + "<br>"
+                    + "<hr>"
+                    + "<b>Tuliskan tanggapan anda:</b>"
+                    + "</body></html>";
+            JLabel labelInfo = new JLabel(htmlInfo);
+
+            JTextArea textArea = new JTextArea(6, 25);
+            textArea.setLineWrap(true);
+            textArea.setWrapStyleWord(true);
+            JScrollPane scrollPane = new JScrollPane(textArea);
+            panel.add(labelInfo, BorderLayout.NORTH);
+            panel.add(scrollPane, BorderLayout.CENTER);
+
+            int result = JOptionPane.showConfirmDialog(this, panel,
+                    "Berikan Tanggapan (ID: " + id + ")",
+                    JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+
+            if (result == JOptionPane.OK_OPTION) {
+                String isiTanggapan = textArea.getText().trim();
+                if (isiTanggapan.isEmpty()) {
+                    JOptionPane.showMessageDialog(this, "Tanggapan tidak boleh kosong!", "Peringatan", JOptionPane.WARNING_MESSAGE);
+                    return;
+                }
+
+                int yakin = JOptionPane.showConfirmDialog(this,
+                        "Apakah Anda yakin ingin mengirim tanggapan ini?\nStatus akan berubah menjadi 'SELESAI'.",
+                        "Konfirmasi Kirim", JOptionPane.YES_NO_OPTION);
+
+                if (yakin == JOptionPane.YES_OPTION) {
+                    String sqlInsert = "INSERT INTO tanggapan (id_pengaduan, tgl_tanggapan, isi_tanggapan, id_users) VALUES (?, NOW(), ?, ?)";
+                    PreparedStatement psInsert = conn.prepareStatement(sqlInsert);
+                    psInsert.setString(1, id);
+                    psInsert.setString(2, isiTanggapan);
+                    psInsert.setInt(3, config.userSession.getInstance().getIdUsers());
+
+                    if (psInsert.executeUpdate() > 0) {
+                        updateStatus(id, "selesai");
+                        JOptionPane.showMessageDialog(this, "Tanggapan berhasil dikirim dan status diperbarui!", "Sukses", JOptionPane.INFORMATION_MESSAGE);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "Terjadi kesalahan: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            e.printStackTrace();
         }
     }
 
@@ -496,9 +579,9 @@ public class form_pengaduan_data extends javax.swing.JFrame {
 
     private void btn_sign_out2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_sign_out2ActionPerformed
         int confirm = JOptionPane.showConfirmDialog(this,
-            "Apakah Anda yakin ingin Logout?",
-            "Konfirmasi Logout",
-            JOptionPane.YES_NO_OPTION);
+                "Apakah Anda yakin ingin Logout?",
+                "Konfirmasi Logout",
+                JOptionPane.YES_NO_OPTION);
 
         if (confirm == JOptionPane.YES_OPTION) {
             config.userSession.getInstance().logout();
@@ -508,8 +591,8 @@ public class form_pengaduan_data extends javax.swing.JFrame {
                 this.dispose();
             } catch (Exception e) {
                 JOptionPane.showMessageDialog(this,
-                    "Gagal redirect ke halaman login: " + e.getMessage(),
-                    "Error", JOptionPane.ERROR_MESSAGE);
+                        "Gagal redirect ke halaman login: " + e.getMessage(),
+                        "Error", JOptionPane.ERROR_MESSAGE);
             }
         }
     }//GEN-LAST:event_btn_sign_out2ActionPerformed
@@ -536,7 +619,7 @@ public class form_pengaduan_data extends javax.swing.JFrame {
 
     private void navLaporan2MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_navLaporan2MouseClicked
         try {
-            admin.rekap_laporan.form_rekap_laporan rekapLaporanForm = new  admin.rekap_laporan.form_rekap_laporan();
+            admin.rekap_laporan.form_rekap_laporan rekapLaporanForm = new admin.rekap_laporan.form_rekap_laporan();
             rekapLaporanForm.setVisible(true);
             this.dispose();
         } catch (Exception e) {
@@ -602,17 +685,21 @@ public class form_pengaduan_data extends javax.swing.JFrame {
             button = new JButton();
             button.addActionListener(e -> {
                 int row = table.getSelectedRow();
-                int col = table.getSelectedColumn();
+                int viewCol = table.getSelectedColumn();
+                int col = table.convertColumnIndexToModel(viewCol);
+
                 if (row != -1) {
-                    String id = table.getValueAt(row, 1).toString();
-                    String name = table.getValueAt(row, 3).toString();
-                    if (col == 10) {
+                    String id = table.getModel().getValueAt(row, 1).toString();
+                    String name = table.getModel().getValueAt(row, 3).toString();
+
+                    if (col == 11) {
                         showDetailPengaduan(row);
-                    } else {
-                        String status = table.getValueAt(row, 6).toString().toLowerCase();
+                    } else if (col == 10) {
+                        String status = table.getModel().getValueAt(row, 7).toString().toLowerCase();
                         if (status.equals("belum")) {
                             Object[] op = {"Terima", "Tolak", "Batal"};
-                            int choice = JOptionPane.showOptionDialog(null, "Proses Nama: " + name, "Admin", 0, 3, null, op, op[0]);
+                            int choice = JOptionPane.showOptionDialog(null, "Proses Pengaduan dari: " + name, "Konfirmasi Admin",
+                                    JOptionPane.DEFAULT_OPTION, JOptionPane.QUESTION_MESSAGE, null, op, op[0]);
                             if (choice == 0) {
                                 updateStatus(id, "proses");
                             } else if (choice == 1) {
@@ -640,5 +727,4 @@ public class form_pengaduan_data extends javax.swing.JFrame {
             return label;
         }
     }
-
 }

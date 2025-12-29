@@ -587,8 +587,8 @@ public class form_profile extends javax.swing.JFrame {
             String pekerjaan = inputPekerjaan.getText().trim();
             String pernikahan = inputPernikahan.getSelectedItem().toString();
 
-            if (email.isEmpty() || password.isEmpty() || nik.isEmpty() || nama.isEmpty()
-                || tanggalLahir == null || rt.isEmpty() || rw.isEmpty()) {
+            if (email.isEmpty() || nik.isEmpty() || nama.isEmpty()
+                    || tanggalLahir == null || rt.isEmpty() || rw.isEmpty() || pekerjaan.isEmpty() || pernikahan.isEmpty()) {
                 JOptionPane.showMessageDialog(this, "Semua data wajib diisi!", "Peringatan", JOptionPane.WARNING_MESSAGE);
                 return;
             }
@@ -598,66 +598,90 @@ public class form_profile extends javax.swing.JFrame {
                 return;
             }
 
-            if (password.length() < 8) {
-                JOptionPane.showMessageDialog(this, "Password minimal 8 karakter!", "Peringatan", JOptionPane.WARNING_MESSAGE);
-                return;
-            }
-
-            String passwordHashed = config.hashUtils.hashMD5(password);
             config.userSession session = config.userSession.getInstance();
+
             int confirm = JOptionPane.showConfirmDialog(this, "Simpan perubahan profile?", "Konfirmasi", JOptionPane.YES_NO_OPTION);
             if (confirm != JOptionPane.YES_OPTION) {
                 return;
             }
 
+            Connection conn = config.connection.getConnection();
+            String sql;
+            PreparedStatement ps;
             String finalFileName = (fileFoto != null) ? namaFileFoto : session.getImgProfile();
-            if (fileFoto != null) {
-                File dir = new File("src/uploads/profile");
-                if (!dir.exists()) {
-                    dir.mkdirs();
+
+            if (!password.isEmpty() && !password.equals(session.getPassword())) {
+                if (password.length() < 8) {
+                    JOptionPane.showMessageDialog(this, "Password baru minimal 8 karakter!");
+                    return;
                 }
 
-                if (session.getImgProfile() != null && !session.getImgProfile().equals("default_profile.jpg")) {
-                    new File(dir + "/" + session.getImgProfile()).delete();
-                }
-                Files.copy(fileFoto.toPath(), new File(dir + "/" + finalFileName).toPath(), StandardCopyOption.REPLACE_EXISTING);
+                String passwordHashed = config.hashUtils.hashMD5(password);
+
+                sql = "UPDATE users SET email=?, password=?, nik=?, nama=?, tempat_lahir=?, tanggal_lahir=?, "
+                        + "agama=?, jenis_kelamin=?, rt=?, rw=?, pekerjaan=?, pernikahan=?, img_profile=? "
+                        + "WHERE id_users=?";
+                ps = conn.prepareStatement(sql);
+                ps.setString(1, email);
+                ps.setString(2, passwordHashed);
+                ps.setString(3, nik);
+                ps.setString(4, nama);
+                ps.setString(5, tempatLahir);
+                ps.setString(6, new java.text.SimpleDateFormat("yyyy-MM-dd").format(tanggalLahir));
+                ps.setString(7, agama);
+                ps.setString(8, jenisKelamin);
+                ps.setString(9, rt);
+                ps.setString(10, rw);
+                ps.setString(11, pekerjaan);
+                ps.setString(12, pernikahan);
+                ps.setString(13, finalFileName);
+                ps.setInt(14, session.getIdUsers());
+            } else {
+                sql = "UPDATE users SET email=?, nik=?, nama=?, tempat_lahir=?, tanggal_lahir=?, "
+                        + "agama=?, jenis_kelamin=?, rt=?, rw=?, pekerjaan=?, pernikahan=?, img_profile=? "
+                        + "WHERE id_users=?";
+                ps = conn.prepareStatement(sql);
+                ps.setString(1, email);
+                ps.setString(2, nik);
+                ps.setString(3, nama);
+                ps.setString(4, tempatLahir);
+                ps.setString(5, new java.text.SimpleDateFormat("yyyy-MM-dd").format(tanggalLahir));
+                ps.setString(6, agama);
+                ps.setString(7, jenisKelamin);
+                ps.setString(8, rt);
+                ps.setString(9, rw);
+                ps.setString(10, pekerjaan);
+                ps.setString(11, pernikahan);
+                ps.setString(12, finalFileName);
+                ps.setInt(13, session.getIdUsers());
             }
 
-            Connection conn = config.connection.getConnection();
-            String sql = "UPDATE users SET email=?, password=?, nik=?, nama=?, tempat_lahir=?, tanggal_lahir=?, "
-            + "agama=?, jenis_kelamin=?, rt=?, rw=?, pekerjaan=?, pernikahan=?, img_profile=? "
-            + "WHERE id_users=?";
-
-            PreparedStatement ps = conn.prepareStatement(sql);
-            ps.setString(1, email);
-            ps.setString(2, passwordHashed);
-            ps.setString(3, nik);
-            ps.setString(4, nama);
-            ps.setString(5, tempatLahir);
-            ps.setString(6, new java.text.SimpleDateFormat("yyyy-MM-dd").format(tanggalLahir));
-            ps.setString(7, agama);
-            ps.setString(8, jenisKelamin);
-            ps.setString(9, rt);
-            ps.setString(10, rw);
-            ps.setString(11, pekerjaan);
-            ps.setString(12, pernikahan);
-            ps.setString(13, finalFileName);
-            ps.setInt(14, session.getIdUsers());
-
             if (ps.executeUpdate() > 0) {
-                session.login(session.getIdUsers(), email, passwordHashed, nik, nama, tempatLahir, tanggalLahir,
-                    agama, jenisKelamin, rt, rw, pekerjaan, pernikahan, session.getRole(), session.getStatus(), finalFileName);
+                if (fileFoto != null) {
+                    File dir = new File("src/uploads/profile");
+                    if (!dir.exists()) {
+                        dir.mkdirs();
+                    }
 
+                    if (session.getImgProfile() != null && !session.getImgProfile().equals("default_profile.jpg")) {
+                        File oldFile = new File(dir + "/" + session.getImgProfile());
+                        if (oldFile.exists()) {
+                            oldFile.delete();
+                        }
+                    }
+                    java.nio.file.Files.copy(fileFoto.toPath(), new File(dir + "/" + finalFileName).toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+                }
+
+                String sessionPass = (!password.isEmpty()) ? config.hashUtils.hashMD5(password) : session.getPassword();
+                session.login(session.getIdUsers(), email, null, nik, nama, tempatLahir, tanggalLahir,
+                        agama, jenisKelamin, rt, rw, pekerjaan, pernikahan, session.getRole(), session.getStatus(), finalFileName);
                 JOptionPane.showMessageDialog(this, "Profile Berhasil Diperbarui!");
+                fileFoto = null;
                 initProfile();
             }
 
         } catch (Exception e) {
-            if (e.getMessage().contains("Data truncation")) {
-                JOptionPane.showMessageDialog(this, "Error: NIK harus 16 digit. Periksa kembali inputan Anda.");
-            } else {
-                JOptionPane.showMessageDialog(this, "Error: " + e.getMessage());
-            }
+            JOptionPane.showMessageDialog(this, "Error: " + e.getMessage());
         }
     }//GEN-LAST:event_btnUpdateProfileActionPerformed
 
@@ -716,9 +740,9 @@ public class form_profile extends javax.swing.JFrame {
 
     private void btn_sign_outActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_sign_outActionPerformed
         int confirm = JOptionPane.showConfirmDialog(this,
-            "Apakah Anda yakin ingin Logout?",
-            "Konfirmasi Logout",
-            JOptionPane.YES_NO_OPTION);
+                "Apakah Anda yakin ingin Logout?",
+                "Konfirmasi Logout",
+                JOptionPane.YES_NO_OPTION);
 
         if (confirm == JOptionPane.YES_OPTION) {
             config.userSession.getInstance().logout();
@@ -728,8 +752,8 @@ public class form_profile extends javax.swing.JFrame {
                 this.dispose();
             } catch (Exception e) {
                 JOptionPane.showMessageDialog(this,
-                    "Gagal redirect ke halaman login: " + e.getMessage(),
-                    "Error", JOptionPane.ERROR_MESSAGE);
+                        "Gagal redirect ke halaman login: " + e.getMessage(),
+                        "Error", JOptionPane.ERROR_MESSAGE);
             }
         }
     }//GEN-LAST:event_btn_sign_outActionPerformed
@@ -756,7 +780,7 @@ public class form_profile extends javax.swing.JFrame {
 
     private void navLaporanMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_navLaporanMouseClicked
         try {
-            admin.rekap_laporan.form_rekap_laporan rekapLaporanForm = new  admin.rekap_laporan.form_rekap_laporan();
+            admin.rekap_laporan.form_rekap_laporan rekapLaporanForm = new admin.rekap_laporan.form_rekap_laporan();
             rekapLaporanForm.setVisible(true);
             this.dispose();
         } catch (Exception e) {

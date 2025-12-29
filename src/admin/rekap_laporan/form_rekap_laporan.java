@@ -10,6 +10,7 @@ import auth.*;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Image;
+import java.io.File;
 
 import java.sql.*;
 import javax.swing.BorderFactory;
@@ -37,24 +38,18 @@ public class form_rekap_laporan extends javax.swing.JFrame {
     }
 
     public void tampilDataPengaduan(String keyword) {
-        DefaultTableModel model = new DefaultTableModel() {
-            @Override
-            public boolean isCellEditable(int row, int column) {
-                return column == 9; 
-            }
+        String[] columnNames = {
+            "No", "ID", "Tanggal", "Nama Pengadu", "Judul",
+            "Deskripsi", "Kategori", "Status", "Tanggapan",
+            "Foto", "Aksi"
         };
 
-        model.addColumn("No");
-        model.addColumn("ID");            
-        model.addColumn("Tanggal");       
-        model.addColumn("Nama Pengadu");  
-        model.addColumn("Judul");        
-        model.addColumn("Kategori");       
-        model.addColumn("Deskripsi");      
-        model.addColumn("Status");        
-        model.addColumn("Tanggapan");     
-        model.addColumn("Foto");           
-        model.addColumn("Detail");        
+        DefaultTableModel model = new DefaultTableModel(columnNames, 0) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return column == 10;
+            }
+        };
 
         try {
             String sql = "SELECT p.*, u.nama, k.nama_kategori, t.isi_tanggapan "
@@ -63,7 +58,7 @@ public class form_rekap_laporan extends javax.swing.JFrame {
                     + "JOIN kategori_pengaduan k ON p.id_kategori_pengaduan = k.id_kategori_pengaduan "
                     + "LEFT JOIN tanggapan t ON p.id_pengaduan = t.id_pengaduan "
                     + "WHERE p.judul_pengaduan LIKE ? OR u.nama LIKE ? "
-                    + "ORDER BY p.tgl_pegaduan DESC";
+                    + "ORDER BY p.id_pengaduan DESC";
 
             Connection conn = config.connection.getConnection();
             PreparedStatement ps = conn.prepareStatement(sql);
@@ -79,71 +74,103 @@ public class form_rekap_laporan extends javax.swing.JFrame {
                     rs.getString("tgl_pegaduan"),
                     rs.getString("nama"),
                     rs.getString("judul_pengaduan"),
+                    rs.getString("deskripsi_pengaduan"),
                     rs.getString("nama_kategori"),
-                    rs.getString("deskripsi_pengaduan"), 
                     rs.getString("status").toUpperCase(),
                     rs.getString("isi_tanggapan") == null ? "-" : rs.getString("isi_tanggapan"),
-                    rs.getString("foto_pengaduan"), 
-                    "Show"
+                    rs.getString("foto_pengaduan"),
+                    "Detail"
                 });
             }
+
             tabelDataPengaduan.setModel(model);
 
-            int[] hiddenCols = {1, 6, 9};
-            for (int col : hiddenCols) {
+            int[] hiddenColumns = {1, 9};
+            for (int col : hiddenColumns) {
                 tabelDataPengaduan.getColumnModel().getColumn(col).setMinWidth(0);
                 tabelDataPengaduan.getColumnModel().getColumn(col).setMaxWidth(0);
-                tabelDataPengaduan.getColumnModel().getColumn(col).setWidth(0);
+                tabelDataPengaduan.getColumnModel().getColumn(col).setPreferredWidth(0);
             }
 
             tabelDataPengaduan.getColumnModel().getColumn(10).setCellRenderer(new ButtonRenderer());
             tabelDataPengaduan.getColumnModel().getColumn(10).setCellEditor(new ButtonEditor(new JCheckBox()));
-
             tabelDataPengaduan.setRowHeight(35);
+            tabelDataPengaduan.getTableHeader().setReorderingAllowed(false);
+
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
+    private void setColumnWidth(int index, int width) {
+        tabelDataPengaduan.getColumnModel().getColumn(index).setMinWidth(width);
+        tabelDataPengaduan.getColumnModel().getColumn(index).setMaxWidth(width);
+        tabelDataPengaduan.getColumnModel().getColumn(index).setWidth(width);
+    }
+
     private void showDetailPengaduan(int row) {
-        String id = tabelDataPengaduan.getValueAt(row, 1).toString();
-        String nama = tabelDataPengaduan.getValueAt(row, 3).toString();
-        String judul = tabelDataPengaduan.getValueAt(row, 4).toString();
-        String kategori = tabelDataPengaduan.getValueAt(row, 5).toString();
-        String deskripsi = tabelDataPengaduan.getValueAt(row, 6).toString();
-        String status = tabelDataPengaduan.getValueAt(row, 7).toString();
-        String fotoName = tabelDataPengaduan.getValueAt(row, 9).toString();
+        String id = tabelDataPengaduan.getModel().getValueAt(row, 1).toString();
+        String tanggal = tabelDataPengaduan.getModel().getValueAt(row, 2).toString();
+        String nama = tabelDataPengaduan.getModel().getValueAt(row, 3).toString();
+        String judul = tabelDataPengaduan.getModel().getValueAt(row, 4).toString();
+        String deskripsi = tabelDataPengaduan.getModel().getValueAt(row, 5).toString();
+        String kategori = tabelDataPengaduan.getModel().getValueAt(row, 6).toString();
+        String status = tabelDataPengaduan.getModel().getValueAt(row, 7).toString();
+        String fotoName = tabelDataPengaduan.getModel().getValueAt(row, 9).toString();
 
-        JPanel panel = new JPanel(new BorderLayout(10, 10));
-        String infoHtml = "<html><b>ID:</b> " + id + "<br><b>Pengadu:</b> " + nama
-                + "<br><b>Kategori:</b> " + kategori + "<br><b>Judul:</b> " + judul
-                + "<br><b>Status:</b> " + status + "</html>";
+        String infoTanggapan = "<i style='color:gray;'>Belum ditanggapi.</i>";
 
-        JTextArea txtDeskripsi = new JTextArea(deskripsi, 5, 30);
-        txtDeskripsi.setLineWrap(true);
-        txtDeskripsi.setWrapStyleWord(true);
-        txtDeskripsi.setEditable(false);
-        JScrollPane scrollDeskripsi = new JScrollPane(txtDeskripsi);
-        scrollDeskripsi.setBorder(BorderFactory.createTitledBorder("Deskripsi Laporan"));
-
-        JLabel labelFoto = new JLabel();
         try {
-            ImageIcon icon = new ImageIcon("src/uploads/pengaduan/" + fotoName);
-            Image img = icon.getImage().getScaledInstance(350, 250, Image.SCALE_SMOOTH);
-            labelFoto.setIcon(new ImageIcon(img));
-            labelFoto.setHorizontalAlignment(JLabel.CENTER);
+            String sql = "SELECT t.isi_tanggapan, u.nama FROM tanggapan t "
+                    + "JOIN users u ON t.id_users = u.id_users WHERE t.id_pengaduan = ?";
+            Connection conn = config.connection.getConnection();
+            PreparedStatement ps = conn.prepareStatement(sql);
+            ps.setString(1, id);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                infoTanggapan = rs.getString("isi_tanggapan");
+            }
         } catch (Exception e) {
-            labelFoto.setText("Foto tidak tersedia");
+            e.printStackTrace();
         }
 
-        JPanel centerPanel = new JPanel(new BorderLayout(5, 5));
-        centerPanel.add(scrollDeskripsi, BorderLayout.NORTH);
-        centerPanel.add(labelFoto, BorderLayout.CENTER);
+        JPanel panel = new JPanel(new BorderLayout(10, 10));
+        String html = "<html>"
+                + "<body style='width: 380px;'>"
+                + "<h3>Detail Pengaduan</h3>"
+                + "<b>ID Pengaduan :</b> " + id + "<br>"
+                + "<b>Tanggal Pengaduan :</b> " + tanggal + "<br>"
+                + "<b>Nama Pengadu :</b> " + nama + "<br>"
+                + "<b>Kategori :</b> " + kategori + "<br>"
+                + "<b>Status :</b> " + status + "<br><br>"
+                + "<b>Judul :</b> " + judul + "<br>"
+                + "<p><b>Deskripsi :</b><br>" + deskripsi + "</p>"
+                + "<hr>"
+                + "<div style='background-color: #f2f2f2; padding: 6px 0;'>"
+                + "<b>Tanggapan Admin :</b><br>" + infoTanggapan
+                + "</div>"
+                + "</body></html>";
 
-        panel.add(new JLabel(infoHtml), BorderLayout.NORTH);
-        panel.add(centerPanel, BorderLayout.CENTER);
+        JLabel labelInfo = new JLabel(html);
+        JLabel labelFoto = new JLabel();
+        labelFoto.setHorizontalAlignment(JLabel.CENTER);
 
-        JOptionPane.showMessageDialog(this, panel, "Detail Pengaduan", JOptionPane.PLAIN_MESSAGE);
+        try {
+            File f = new File("src/uploads/pengaduan/" + fotoName);
+            if (f.exists()) {
+                ImageIcon icon = new ImageIcon(f.getAbsolutePath());
+                Image img = icon.getImage().getScaledInstance(350, -1, Image.SCALE_SMOOTH);
+                labelFoto.setIcon(new ImageIcon(img));
+            } else {
+                labelFoto.setText("[ Gambar Tidak Ditemukan ]");
+            }
+        } catch (Exception e) {
+            labelFoto.setText("Gagal memuat gambar.");
+        }
+
+        panel.add(labelInfo, BorderLayout.NORTH);
+        panel.add(labelFoto, BorderLayout.CENTER);
+        JOptionPane.showMessageDialog(this, panel, "Detail Rekap Laporan", JOptionPane.PLAIN_MESSAGE);
     }
 
     @SuppressWarnings("unchecked")
@@ -203,11 +230,16 @@ public class form_rekap_laporan extends javax.swing.JFrame {
             }
         });
 
-        exportData.setBackground(new java.awt.Color(0, 204, 102));
+        exportData.setBackground(new java.awt.Color(255, 0, 51));
         exportData.setFont(new java.awt.Font("Tahoma", 0, 17)); // NOI18N
         exportData.setForeground(new java.awt.Color(255, 255, 255));
         exportData.setIcon(new javax.swing.ImageIcon(getClass().getResource("/assets/icon/akar-icons--file-white.png"))); // NOI18N
-        exportData.setText("Export Data");
+        exportData.setText("PDF");
+        exportData.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                exportDataActionPerformed(evt);
+            }
+        });
 
         jPanel2.setBackground(new java.awt.Color(0, 153, 255));
         jPanel2.setForeground(new java.awt.Color(255, 255, 255));
@@ -402,7 +434,7 @@ public class form_rekap_laporan extends javax.swing.JFrame {
                     .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
                         .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 909, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGroup(layout.createSequentialGroup()
-                            .addComponent(exportData, javax.swing.GroupLayout.PREFERRED_SIZE, 238, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(exportData, javax.swing.GroupLayout.PREFERRED_SIZE, 102, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addComponent(searchingPengaduan, javax.swing.GroupLayout.PREFERRED_SIZE, 303, javax.swing.GroupLayout.PREFERRED_SIZE)))
                     .addComponent(jLabel8)
@@ -479,9 +511,9 @@ public class form_rekap_laporan extends javax.swing.JFrame {
 
     private void btn_sign_outActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_sign_outActionPerformed
         int confirm = JOptionPane.showConfirmDialog(this,
-            "Apakah Anda yakin ingin Logout?",
-            "Konfirmasi Logout",
-            JOptionPane.YES_NO_OPTION);
+                "Apakah Anda yakin ingin Logout?",
+                "Konfirmasi Logout",
+                JOptionPane.YES_NO_OPTION);
 
         if (confirm == JOptionPane.YES_OPTION) {
             config.userSession.getInstance().logout();
@@ -491,8 +523,8 @@ public class form_rekap_laporan extends javax.swing.JFrame {
                 this.dispose();
             } catch (Exception e) {
                 JOptionPane.showMessageDialog(this,
-                    "Gagal redirect ke halaman login: " + e.getMessage(),
-                    "Error", JOptionPane.ERROR_MESSAGE);
+                        "Gagal redirect ke halaman login: " + e.getMessage(),
+                        "Error", JOptionPane.ERROR_MESSAGE);
             }
         }
     }//GEN-LAST:event_btn_sign_outActionPerformed
@@ -519,13 +551,26 @@ public class form_rekap_laporan extends javax.swing.JFrame {
 
     private void navLaporanMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_navLaporanMouseClicked
         try {
-            admin.rekap_laporan.form_rekap_laporan rekapLaporanForm = new  admin.rekap_laporan.form_rekap_laporan();
+            admin.rekap_laporan.form_rekap_laporan rekapLaporanForm = new admin.rekap_laporan.form_rekap_laporan();
             rekapLaporanForm.setVisible(true);
             this.dispose();
         } catch (Exception e) {
             JOptionPane.showMessageDialog(this, "Gagal membuka form rekap laporan : " + e.getMessage(), "Error Redirect", JOptionPane.ERROR_MESSAGE);
         }
     }//GEN-LAST:event_navLaporanMouseClicked
+
+    private void exportDataActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_exportDataActionPerformed
+        javax.swing.JFileChooser chooser = new javax.swing.JFileChooser();
+        chooser.setDialogTitle("Save Laporan Rekap Pengaduan");
+        if (chooser.showSaveDialog(this) == javax.swing.JFileChooser.APPROVE_OPTION) {
+            String path = chooser.getSelectedFile().getAbsolutePath();
+            if (!path.endsWith(".pdf")) {
+                path += ".pdf";
+            }
+            laporanGeneratorPengaduan.cetakLaporan((DefaultTableModel) tabelDataPengaduan.getModel(), path);
+            javax.swing.JOptionPane.showMessageDialog(this, "Laporan Rekap Pengaduan PDF Berhasil Dibuat!");
+        }
+    }//GEN-LAST:event_exportDataActionPerformed
 
     public static void main(String args[]) {
         java.awt.EventQueue.invokeLater(new Runnable() {
@@ -563,6 +608,7 @@ public class form_rekap_laporan extends javax.swing.JFrame {
     // End of variables declaration//GEN-END:variables
 
     class ButtonRenderer extends JButton implements TableCellRenderer {
+
         public ButtonRenderer() {
             setOpaque(true);
         }
@@ -573,30 +619,35 @@ public class form_rekap_laporan extends javax.swing.JFrame {
             return this;
         }
     }
-    
-    class ButtonEditor extends DefaultCellEditor {
-    protected JButton button;
-    private JTable table;
 
-    public ButtonEditor(JCheckBox checkBox) {
-        super(checkBox);
-        button = new JButton();
-        button.addActionListener(e -> {
-            int row = table.getSelectedRow();
-            if (row != -1) {
-                showDetailPengaduan(row);
-            }
-            fireEditingStopped();
-        });
+    class ButtonEditor extends DefaultCellEditor {
+
+        protected JButton button;
+        private JTable table;
+
+        public ButtonEditor(JCheckBox checkBox) {
+            super(checkBox);
+            button = new JButton();
+            button.addActionListener(e -> {
+                int row = table.getSelectedRow();
+                if (row != -1) {
+                    showDetailPengaduan(row);
+                }
+                fireEditingStopped();
+            });
+        }
+
+        @Override
+        public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row, int col) {
+            this.table = table;
+            button.setText((value == null) ? "" : value.toString());
+            return button;
+        }
+
+        @Override
+        public Object getCellEditorValue() {
+            return button.getText();
+        }
     }
-    @Override
-    public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row, int col) {
-        this.table = table;
-        button.setText((value == null) ? "" : value.toString());
-        return button;
-    }
-    @Override
-    public Object getCellEditorValue() { return button.getText(); }
-}
 
 }

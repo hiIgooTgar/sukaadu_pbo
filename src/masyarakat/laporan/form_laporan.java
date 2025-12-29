@@ -32,64 +32,7 @@ public class form_laporan extends javax.swing.JFrame {
             return;
         }
         initComponents();
-        tampilLaporan();
-    }
-
-    private void tampilLaporan() {
-        DefaultTableModel model = new DefaultTableModel() {
-            @Override
-            public boolean isCellEditable(int row, int column) {
-                return false;
-            }
-        };
-
-        model.addColumn("ID");
-        model.addColumn("ID Pengaduan");
-        model.addColumn("Tanggal");
-        model.addColumn("Judul");
-        model.addColumn("Deskripsi");
-        model.addColumn("Kategori");
-        model.addColumn("Foto");
-        model.addColumn("Status");
-        model.addColumn("Aksi");
-
-        try {
-            int no = 1;
-            int idUsers = config.userSession.getInstance().getIdUsers();
-            Connection conn = config.connection.getConnection();
-            String sql = "SELECT p.id_pengaduan, p.tgl_pegaduan, p.judul_pengaduan, p.deskripsi_pengaduan, "
-                    + "k.nama_kategori, p.foto_pengaduan, p.status "
-                    + "FROM pengaduan p "
-                    + "JOIN kategori_pengaduan k ON p.id_kategori_pengaduan = k.id_kategori_pengaduan "
-                    + "WHERE p.id_users = ? ORDER BY p.id_pengaduan DESC";
-            PreparedStatement ps = conn.prepareStatement(sql);
-            ps.setInt(1, idUsers);
-            ResultSet rs = ps.executeQuery();
-
-            while (rs.next()) {
-                model.addRow(new Object[]{
-                    no++,
-                    rs.getString("id_pengaduan"),
-                    rs.getString("tgl_pegaduan"),
-                    rs.getString("judul_pengaduan"),
-                    rs.getString("deskripsi_pengaduan"),
-                    rs.getString("nama_kategori"),
-                    rs.getString("foto_pengaduan"),
-                    rs.getString("status"),
-                    "Lihat Tanggapan"
-                });
-            }
-
-            tabelLaporanMasyarakat.setModel(model);
-            tabelLaporanMasyarakat.setRowHeight(80);
-            tabelLaporanMasyarakat.getColumnModel().getColumn(1).setMinWidth(0);
-            tabelLaporanMasyarakat.getColumnModel().getColumn(1).setMaxWidth(0);
-            tabelLaporanMasyarakat.getColumnModel().getColumn(1).setWidth(0);
-            setTableRenderers();
-            setTableButtonListener();
-        } catch (Exception e) {
-            JOptionPane.showMessageDialog(this, "Gagal memuat laporan: " + e.getMessage());
-        }
+        cariLaporan("");
     }
 
     private void cariLaporan(String keyword) {
@@ -234,8 +177,8 @@ public class form_laporan extends javax.swing.JFrame {
                     btn.setBackground(new Color(40, 167, 69));
                     btn.setForeground(Color.WHITE);
                 } else if (status.equals("tolak")) {
-                   btn.setText("Hapus Pengaduan");
-                   btn.setBackground(new Color(255, 51, 51));
+                    btn.setText("Hapus Pengaduan");
+                    btn.setBackground(new Color(255, 51, 51));
                     btn.setForeground(Color.WHITE);
                 }
 
@@ -293,7 +236,7 @@ public class form_laporan extends javax.swing.JFrame {
             int execution = ps.executeUpdate();
             if (execution > 0) {
                 JOptionPane.showMessageDialog(this, "Pengaduan berhasil dihapus.");
-                tampilLaporan();
+                cariLaporan("");
             }
         } catch (Exception e) {
             JOptionPane.showMessageDialog(this, "Gagal menghapus: " + e.getMessage());
@@ -337,6 +280,8 @@ public class form_laporan extends javax.swing.JFrame {
         jScrollPane1 = new javax.swing.JScrollPane();
         tabelLaporanMasyarakat = new javax.swing.JTable();
         searchingLaporan = new javax.swing.JTextField();
+        btnExportPengaduan = new javax.swing.JButton();
+        btnExportPengaduanExcel = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -463,6 +408,28 @@ public class form_laporan extends javax.swing.JFrame {
             }
         });
 
+        btnExportPengaduan.setBackground(new java.awt.Color(255, 0, 51));
+        btnExportPengaduan.setFont(new java.awt.Font("Tahoma", 0, 17)); // NOI18N
+        btnExportPengaduan.setForeground(new java.awt.Color(255, 255, 255));
+        btnExportPengaduan.setIcon(new javax.swing.ImageIcon(getClass().getResource("/assets/icon/akar-icons--file-white.png"))); // NOI18N
+        btnExportPengaduan.setText("PDF");
+        btnExportPengaduan.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnExportPengaduanActionPerformed(evt);
+            }
+        });
+
+        btnExportPengaduanExcel.setBackground(new java.awt.Color(0, 153, 0));
+        btnExportPengaduanExcel.setFont(new java.awt.Font("Tahoma", 0, 17)); // NOI18N
+        btnExportPengaduanExcel.setForeground(new java.awt.Color(255, 255, 255));
+        btnExportPengaduanExcel.setIcon(new javax.swing.ImageIcon(getClass().getResource("/assets/icon/akar-icons--file-white.png"))); // NOI18N
+        btnExportPengaduanExcel.setText("Excel");
+        btnExportPengaduanExcel.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnExportPengaduanExcelActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -473,7 +440,12 @@ public class form_laporan extends javax.swing.JFrame {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jLabel7)
                     .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                        .addComponent(searchingLaporan, javax.swing.GroupLayout.PREFERRED_SIZE, 317, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGroup(layout.createSequentialGroup()
+                            .addComponent(btnExportPengaduanExcel, javax.swing.GroupLayout.PREFERRED_SIZE, 104, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addGap(18, 18, 18)
+                            .addComponent(btnExportPengaduan, javax.swing.GroupLayout.PREFERRED_SIZE, 102, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addGap(18, 18, 18)
+                            .addComponent(searchingLaporan, javax.swing.GroupLayout.PREFERRED_SIZE, 317, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(jLabel1)
                             .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 1046, javax.swing.GroupLayout.PREFERRED_SIZE))))
@@ -487,8 +459,11 @@ public class form_laporan extends javax.swing.JFrame {
                 .addComponent(jLabel1)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jLabel7)
-                .addGap(28, 28, 28)
-                .addComponent(searchingLaporan, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(27, 27, 27)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(searchingLaporan, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(btnExportPengaduan, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(btnExportPengaduanExcel, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(18, 18, 18)
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 430, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap(91, Short.MAX_VALUE))
@@ -561,7 +536,7 @@ public class form_laporan extends javax.swing.JFrame {
         String keyword = searchingLaporan.getText().trim();
 
         if (keyword.isEmpty()) {
-            tampilLaporan(); 
+            cariLaporan("");
         } else {
             cariLaporan(keyword);
         }
@@ -577,6 +552,43 @@ public class form_laporan extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_navBerandaMouseClicked
 
+    private void btnExportPengaduanActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnExportPengaduanActionPerformed
+        javax.swing.JFileChooser chooser = new javax.swing.JFileChooser();
+        chooser.setDialogTitle("Save Laporan Pengaduan");
+        if (chooser.showSaveDialog(this) == javax.swing.JFileChooser.APPROVE_OPTION) {
+            String path = chooser.getSelectedFile().getAbsolutePath();
+            if (!path.endsWith(".pdf")) {
+                path += ".pdf";
+            }
+            laporanGeneratorPengaduan.cetakLaporan((DefaultTableModel) tabelLaporanMasyarakat.getModel(), path);
+            javax.swing.JOptionPane.showMessageDialog(this, "Laporan Pengaduan PDF Berhasil Dibuat!");
+        }
+    }//GEN-LAST:event_btnExportPengaduanActionPerformed
+
+    private void btnExportPengaduanExcelActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnExportPengaduanExcelActionPerformed
+        javax.swing.JFileChooser chooser = new javax.swing.JFileChooser();
+        chooser.setDialogTitle("Simpan Laporan Pengaduan Excel");
+        chooser.setSelectedFile(new java.io.File("Laporan_Pengaduan_" + System.currentTimeMillis() + ".xlsx"));
+
+        if (chooser.showSaveDialog(this) == javax.swing.JFileChooser.APPROVE_OPTION) {
+            String path = chooser.getSelectedFile().getAbsolutePath();
+            if (!path.toLowerCase().endsWith(".xlsx")) {
+                path += ".xlsx";
+            }
+            try {
+                DefaultTableModel model = (DefaultTableModel) tabelLaporanMasyarakat.getModel();
+                excelGeneratorPengaduan.exportToExcel(model, path);
+                javax.swing.JOptionPane.showMessageDialog(this,
+                        "Data berhasil di-export ke Excel!\nLokasi: " + path,
+                        "Sukses", javax.swing.JOptionPane.INFORMATION_MESSAGE);
+            } catch (Exception e) {
+                javax.swing.JOptionPane.showMessageDialog(this,
+                        "Terjadi kesalahan: " + e.getMessage(),
+                        "Error", javax.swing.JOptionPane.ERROR_MESSAGE);
+            }
+        }
+    }//GEN-LAST:event_btnExportPengaduanExcelActionPerformed
+
     public static void main(String args[]) {
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
@@ -586,7 +598,10 @@ public class form_laporan extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton btnExportPengaduan;
+    private javax.swing.JButton btnExportPengaduanExcel;
     private javax.swing.JButton btn_sign_out;
+    private javax.swing.JButton exportData;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel7;

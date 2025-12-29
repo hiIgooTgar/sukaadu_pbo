@@ -94,7 +94,7 @@ public class form_berita extends javax.swing.JFrame {
             tabelBerita.getColumnModel().getColumn(7).setCellEditor(new ButtonEditor(new JCheckBox()));
             tabelBerita.getColumnModel().getColumn(0).setMinWidth(0);
             tabelBerita.getColumnModel().getColumn(0).setMaxWidth(0);
-            tabelBerita.setRowHeight(29);
+            tabelBerita.setRowHeight(35);
         } catch (Exception e) {
             System.out.println(e.getMessage());
         }
