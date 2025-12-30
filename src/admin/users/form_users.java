@@ -262,6 +262,7 @@ public class form_users extends javax.swing.JFrame {
         jLabel25 = new javax.swing.JLabel();
         jLabel26 = new javax.swing.JLabel();
         btnReportUsers = new javax.swing.JButton();
+        btnExportUsersExcel = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -637,6 +638,17 @@ public class form_users extends javax.swing.JFrame {
             }
         });
 
+        btnExportUsersExcel.setBackground(new java.awt.Color(0, 153, 0));
+        btnExportUsersExcel.setFont(new java.awt.Font("Tahoma", 0, 17)); // NOI18N
+        btnExportUsersExcel.setForeground(new java.awt.Color(255, 255, 255));
+        btnExportUsersExcel.setIcon(new javax.swing.ImageIcon(getClass().getResource("/assets/icon/akar-icons--file-white.png"))); // NOI18N
+        btnExportUsersExcel.setText("Excel");
+        btnExportUsersExcel.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnExportUsersExcelActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -726,6 +738,8 @@ public class form_users extends javax.swing.JFrame {
                                         .addComponent(btnClear, javax.swing.GroupLayout.PREFERRED_SIZE, 157, javax.swing.GroupLayout.PREFERRED_SIZE)))))
                         .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 1010, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGroup(layout.createSequentialGroup()
+                            .addComponent(btnExportUsersExcel, javax.swing.GroupLayout.PREFERRED_SIZE, 104, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addGap(18, 18, 18)
                             .addComponent(btnReportUsers, javax.swing.GroupLayout.PREFERRED_SIZE, 102, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addGap(18, 18, 18)
                             .addComponent(inputSearching, javax.swing.GroupLayout.PREFERRED_SIZE, 294, javax.swing.GroupLayout.PREFERRED_SIZE)))
@@ -832,7 +846,8 @@ public class form_users extends javax.swing.JFrame {
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 63, Short.MAX_VALUE)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(inputSearching, javax.swing.GroupLayout.PREFERRED_SIZE, 39, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(btnReportUsers, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addComponent(btnReportUsers, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(btnExportUsersExcel, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addGap(29, 29, 29)
                         .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 206, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(57, 57, 57))))
@@ -1335,6 +1350,28 @@ public class form_users extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_btnReportUsersActionPerformed
 
+    private void btnExportUsersExcelActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnExportUsersExcelActionPerformed
+        javax.swing.JFileChooser chooser = new javax.swing.JFileChooser();
+        chooser.setDialogTitle("Simpan Laporan Data Users Excel");
+        if (chooser.showSaveDialog(this) == javax.swing.JFileChooser.APPROVE_OPTION) {
+            String path = chooser.getSelectedFile().getAbsolutePath();
+            if (!path.toLowerCase().endsWith(".xlsx")) {
+                path += ".xlsx";
+            }
+            try {
+                DefaultTableModel model = (DefaultTableModel) tabelUsers.getModel();
+                excelGeneratorUsers.exportToExcel(model, path);
+                javax.swing.JOptionPane.showMessageDialog(this,
+                    "Data users berhasil di-export ke Excel",
+                    "Sukses", javax.swing.JOptionPane.INFORMATION_MESSAGE);
+            } catch (Exception e) {
+                javax.swing.JOptionPane.showMessageDialog(this,
+                    "Terjadi kesalahan: " + e.getMessage(),
+                    "Error", javax.swing.JOptionPane.ERROR_MESSAGE);
+            }
+        }
+    }//GEN-LAST:event_btnExportUsersExcelActionPerformed
+
     public static void main(String args[]) {
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
@@ -1347,6 +1384,10 @@ public class form_users extends javax.swing.JFrame {
     private javax.swing.JButton btnAdd;
     private javax.swing.JButton btnClear;
     private javax.swing.JButton btnDelete;
+    private javax.swing.JButton btnExportBeritaExcel;
+    private javax.swing.JButton btnExportBeritaExcel1;
+    private javax.swing.JButton btnExportBeritaExcel2;
+    private javax.swing.JButton btnExportUsersExcel;
     private javax.swing.JButton btnProfileChoose;
     private javax.swing.JButton btnReportUsers;
     private javax.swing.JButton btnUpdate;

@@ -201,6 +201,7 @@ public class form_rekap_laporan extends javax.swing.JFrame {
         jLabel20 = new javax.swing.JLabel();
         jLabel21 = new javax.swing.JLabel();
         jLabel22 = new javax.swing.JLabel();
+        btnExportPengaduanExcel = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -423,6 +424,17 @@ public class form_rekap_laporan extends javax.swing.JFrame {
                 .addContainerGap(261, Short.MAX_VALUE))
         );
 
+        btnExportPengaduanExcel.setBackground(new java.awt.Color(0, 153, 0));
+        btnExportPengaduanExcel.setFont(new java.awt.Font("Tahoma", 0, 17)); // NOI18N
+        btnExportPengaduanExcel.setForeground(new java.awt.Color(255, 255, 255));
+        btnExportPengaduanExcel.setIcon(new javax.swing.ImageIcon(getClass().getResource("/assets/icon/akar-icons--file-white.png"))); // NOI18N
+        btnExportPengaduanExcel.setText("Excel");
+        btnExportPengaduanExcel.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnExportPengaduanExcelActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -435,6 +447,8 @@ public class form_rekap_laporan extends javax.swing.JFrame {
                         .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 909, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGroup(layout.createSequentialGroup()
                             .addComponent(exportData, javax.swing.GroupLayout.PREFERRED_SIZE, 102, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addGap(18, 18, 18)
+                            .addComponent(btnExportPengaduanExcel)
                             .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addComponent(searchingPengaduan, javax.swing.GroupLayout.PREFERRED_SIZE, 303, javax.swing.GroupLayout.PREFERRED_SIZE)))
                     .addComponent(jLabel8)
@@ -456,7 +470,9 @@ public class form_rekap_laporan extends javax.swing.JFrame {
                         .addGap(40, 40, 40)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                             .addComponent(searchingPengaduan)
-                            .addComponent(exportData, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                .addComponent(exportData, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addComponent(btnExportPengaduanExcel, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)))
                         .addGap(27, 27, 27)
                         .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 358, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(62, 62, 62))))
@@ -572,6 +588,28 @@ public class form_rekap_laporan extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_exportDataActionPerformed
 
+    private void btnExportPengaduanExcelActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnExportPengaduanExcelActionPerformed
+       javax.swing.JFileChooser chooser = new javax.swing.JFileChooser();
+        chooser.setDialogTitle("Simpan Laporan Data Pengaduan Excel");
+        if (chooser.showSaveDialog(this) == javax.swing.JFileChooser.APPROVE_OPTION) {
+            String path = chooser.getSelectedFile().getAbsolutePath();
+            if (!path.toLowerCase().endsWith(".xlsx")) {
+                path += ".xlsx";
+            }
+            try {
+                DefaultTableModel model = (DefaultTableModel) tabelDataPengaduan.getModel();
+                excelGeneratorPengaduan.exportToExcel(model, path);
+                javax.swing.JOptionPane.showMessageDialog(this,
+                        "Data pengaduan berhasil di-export ke Excel",
+                        "Sukses", javax.swing.JOptionPane.INFORMATION_MESSAGE);
+            } catch (Exception e) {
+                javax.swing.JOptionPane.showMessageDialog(this,
+                        "Terjadi kesalahan: " + e.getMessage(),
+                        "Error", javax.swing.JOptionPane.ERROR_MESSAGE);
+            }
+        }
+    }//GEN-LAST:event_btnExportPengaduanExcelActionPerformed
+
     public static void main(String args[]) {
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
@@ -581,6 +619,7 @@ public class form_rekap_laporan extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton btnExportPengaduanExcel;
     private javax.swing.JButton btn_sign_out;
     private javax.swing.JButton exportData;
     private javax.swing.JLabel jLabel15;

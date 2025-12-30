@@ -568,8 +568,6 @@ public class form_laporan extends javax.swing.JFrame {
     private void btnExportPengaduanExcelActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnExportPengaduanExcelActionPerformed
         javax.swing.JFileChooser chooser = new javax.swing.JFileChooser();
         chooser.setDialogTitle("Simpan Laporan Pengaduan Excel");
-        chooser.setSelectedFile(new java.io.File("Laporan_Pengaduan_" + System.currentTimeMillis() + ".xlsx"));
-
         if (chooser.showSaveDialog(this) == javax.swing.JFileChooser.APPROVE_OPTION) {
             String path = chooser.getSelectedFile().getAbsolutePath();
             if (!path.toLowerCase().endsWith(".xlsx")) {
@@ -579,7 +577,7 @@ public class form_laporan extends javax.swing.JFrame {
                 DefaultTableModel model = (DefaultTableModel) tabelLaporanMasyarakat.getModel();
                 excelGeneratorPengaduan.exportToExcel(model, path);
                 javax.swing.JOptionPane.showMessageDialog(this,
-                        "Data berhasil di-export ke Excel!\nLokasi: " + path,
+                        "Data pengaduan berhasil di-export ke Excel",
                         "Sukses", javax.swing.JOptionPane.INFORMATION_MESSAGE);
             } catch (Exception e) {
                 javax.swing.JOptionPane.showMessageDialog(this,

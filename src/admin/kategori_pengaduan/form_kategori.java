@@ -98,6 +98,7 @@ public class form_kategori extends javax.swing.JFrame {
         jLabel21 = new javax.swing.JLabel();
         jLabel22 = new javax.swing.JLabel();
         btnReportKategori = new javax.swing.JButton();
+        btnExportKategoriExcel = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -388,6 +389,17 @@ public class form_kategori extends javax.swing.JFrame {
             }
         });
 
+        btnExportKategoriExcel.setBackground(new java.awt.Color(0, 153, 0));
+        btnExportKategoriExcel.setFont(new java.awt.Font("Tahoma", 0, 17)); // NOI18N
+        btnExportKategoriExcel.setForeground(new java.awt.Color(255, 255, 255));
+        btnExportKategoriExcel.setIcon(new javax.swing.ImageIcon(getClass().getResource("/assets/icon/akar-icons--file-white.png"))); // NOI18N
+        btnExportKategoriExcel.setText("Excel");
+        btnExportKategoriExcel.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnExportKategoriExcelActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -413,7 +425,9 @@ public class form_kategori extends javax.swing.JFrame {
                         .addGap(39, 39, 39)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(layout.createSequentialGroup()
-                                .addGap(202, 202, 202)
+                                .addGap(83, 83, 83)
+                                .addComponent(btnExportKategoriExcel, javax.swing.GroupLayout.PREFERRED_SIZE, 104, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                                 .addComponent(btnReportKategori, javax.swing.GroupLayout.PREFERRED_SIZE, 102, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                                 .addComponent(inputSearching, javax.swing.GroupLayout.PREFERRED_SIZE, 273, javax.swing.GroupLayout.PREFERRED_SIZE))
@@ -439,7 +453,8 @@ public class form_kategori extends javax.swing.JFrame {
                         .addGap(35, 35, 35)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(inputSearching, javax.swing.GroupLayout.PREFERRED_SIZE, 39, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(btnReportKategori, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addComponent(btnReportKategori, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(btnExportKategoriExcel, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addGap(26, 26, 26)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(layout.createSequentialGroup()
@@ -700,6 +715,28 @@ public class form_kategori extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_btnReportKategoriActionPerformed
 
+    private void btnExportKategoriExcelActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnExportKategoriExcelActionPerformed
+        javax.swing.JFileChooser chooser = new javax.swing.JFileChooser();
+        chooser.setDialogTitle("Simpan Laporan Data Kategori Pengaduan Excel");
+        if (chooser.showSaveDialog(this) == javax.swing.JFileChooser.APPROVE_OPTION) {
+            String path = chooser.getSelectedFile().getAbsolutePath();
+            if (!path.toLowerCase().endsWith(".xlsx")) {
+                path += ".xlsx";
+            }
+            try {
+                DefaultTableModel model = (DefaultTableModel) tabelKategoriPengaduan.getModel();
+                excelGeneratorKategori.exportToExcel(model, path);
+                javax.swing.JOptionPane.showMessageDialog(this,
+                    "Data kategori pengaduan berhasil di-export ke Excel",
+                    "Sukses", javax.swing.JOptionPane.INFORMATION_MESSAGE);
+            } catch (Exception e) {
+                javax.swing.JOptionPane.showMessageDialog(this,
+                    "Terjadi kesalahan: " + e.getMessage(),
+                    "Error", javax.swing.JOptionPane.ERROR_MESSAGE);
+            }
+        }
+    }//GEN-LAST:event_btnExportKategoriExcelActionPerformed
+
     public static void main(String args[]) {
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
@@ -712,6 +749,7 @@ public class form_kategori extends javax.swing.JFrame {
     private javax.swing.JButton btnAdd;
     private javax.swing.JButton btnClear;
     private javax.swing.JButton btnDelete;
+    private javax.swing.JButton btnExportKategoriExcel;
     private javax.swing.JButton btnReportKategori;
     private javax.swing.JButton btnUpdate;
     private javax.swing.JButton btn_sign_out;
