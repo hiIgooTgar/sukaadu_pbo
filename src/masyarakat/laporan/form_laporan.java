@@ -5,6 +5,7 @@ import masyarakat.pengaduan.*;
 
 import config.userSession;
 import config.sessionValidator;
+import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
@@ -17,11 +18,16 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
+import javax.swing.JButton;
+import javax.swing.JFileChooser;
 import javax.swing.JLabel;
+import javax.swing.BorderFactory;
 
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.JTextArea;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 
@@ -252,11 +258,43 @@ public class form_laporan extends javax.swing.JFrame {
             ResultSet rs = ps.executeQuery();
 
             if (rs.next()) {
-                String pesan = "Tanggal Tanggapan : " + rs.getString("tgl_tanggapan") + "\n\n"
-                        + "Isi Tanggapan :\n" + rs.getString("isi_tanggapan");
-                JOptionPane.showMessageDialog(this, pesan, "Tanggapan Petugas", JOptionPane.INFORMATION_MESSAGE);
-            } else {
-                JOptionPane.showMessageDialog(this, "Belum ada tanggapan untuk pengaduan ini.", "Info", JOptionPane.WARNING_MESSAGE);
+                JPanel panel = new JPanel(new BorderLayout(10, 10));
+                panel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+
+                JTextArea txtArea = new JTextArea("Tanggal Tanggapan : " + rs.getString("tgl_tanggapan")
+                        + "\n\nIsi Tanggapan :\n" + rs.getString("isi_tanggapan"));
+                txtArea.setEditable(false);
+                txtArea.setLineWrap(true);
+                txtArea.setWrapStyleWord(true);
+                JScrollPane scroll = new JScrollPane(txtArea);
+                scroll.setPreferredSize(new Dimension(350, 150));
+
+                JButton btnExport = new JButton("EXPORT PDF");
+                btnExport.setBackground(new Color(255, 0, 51));
+                btnExport.setForeground(Color.WHITE);
+                btnExport.setFont(new Font("Tahoma", Font.BOLD, 12));
+                btnExport.setFocusPainted(false);
+
+                try {
+                    ImageIcon icon = new ImageIcon("src/assets/icon/akar-icons--file-white.png");
+                    Image img = icon.getImage().getScaledInstance(18, 18, Image.SCALE_SMOOTH);
+                    btnExport.setIcon(new ImageIcon(img));
+                } catch (Exception e) {
+                }
+
+                btnExport.addActionListener(e -> {
+                    JFileChooser chooser = new JFileChooser();
+                    chooser.setSelectedFile(new File("laporan_pengaduan_id_" + id + ".pdf"));
+                    if (chooser.showSaveDialog(null) == JFileChooser.APPROVE_OPTION) {
+                        pdfGeneratorPengaduanId.exportToPDF(id, chooser.getSelectedFile().getAbsolutePath());
+                    }
+                });
+
+                panel.add(new JLabel("Detail Tanggapan:"), BorderLayout.NORTH);
+                panel.add(scroll, BorderLayout.CENTER);
+                panel.add(btnExport, BorderLayout.SOUTH);
+
+                JOptionPane.showMessageDialog(this, panel, "Informasi Tanggapan", JOptionPane.PLAIN_MESSAGE);
             }
         } catch (Exception e) {
             e.printStackTrace();

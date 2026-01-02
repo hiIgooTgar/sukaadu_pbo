@@ -8,8 +8,11 @@ import config.sessionValidator;
 import admin.*;
 import auth.*;
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Component;
+import java.awt.Font;
 import java.awt.Image;
+import java.awt.Insets;
 import java.io.File;
 
 import java.sql.*;
@@ -18,6 +21,7 @@ import javax.swing.DefaultCellEditor;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
+import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -41,13 +45,13 @@ public class form_rekap_laporan extends javax.swing.JFrame {
         String[] columnNames = {
             "No", "ID", "Tanggal", "Nama Pengadu", "Judul",
             "Deskripsi", "Kategori", "Status", "Tanggapan",
-            "Foto", "Aksi"
+            "Foto", "Aksi", "Export"
         };
 
         DefaultTableModel model = new DefaultTableModel(columnNames, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
-                return column == 10;
+                return column == 10 || column == 11;
             }
         };
 
@@ -79,7 +83,8 @@ public class form_rekap_laporan extends javax.swing.JFrame {
                     rs.getString("status").toUpperCase(),
                     rs.getString("isi_tanggapan") == null ? "-" : rs.getString("isi_tanggapan"),
                     rs.getString("foto_pengaduan"),
-                    "Detail"
+                    "Detail",
+                    "Export"
                 });
             }
 
@@ -94,8 +99,10 @@ public class form_rekap_laporan extends javax.swing.JFrame {
 
             tabelDataPengaduan.getColumnModel().getColumn(10).setCellRenderer(new ButtonRenderer());
             tabelDataPengaduan.getColumnModel().getColumn(10).setCellEditor(new ButtonEditor(new JCheckBox()));
+            tabelDataPengaduan.getColumnModel().getColumn(11).setCellRenderer(new ExportButtonRenderer());
+            tabelDataPengaduan.getColumnModel().getColumn(11).setCellEditor(new ExportButtonEditor(new JCheckBox()));
+
             tabelDataPengaduan.setRowHeight(35);
-            tabelDataPengaduan.getTableHeader().setReorderingAllowed(false);
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -589,7 +596,7 @@ public class form_rekap_laporan extends javax.swing.JFrame {
     }//GEN-LAST:event_exportDataActionPerformed
 
     private void btnExportPengaduanExcelActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnExportPengaduanExcelActionPerformed
-       javax.swing.JFileChooser chooser = new javax.swing.JFileChooser();
+        javax.swing.JFileChooser chooser = new javax.swing.JFileChooser();
         chooser.setDialogTitle("Simpan Laporan Data Pengaduan Excel");
         if (chooser.showSaveDialog(this) == javax.swing.JFileChooser.APPROVE_OPTION) {
             String path = chooser.getSelectedFile().getAbsolutePath();
@@ -686,6 +693,89 @@ public class form_rekap_laporan extends javax.swing.JFrame {
         @Override
         public Object getCellEditorValue() {
             return button.getText();
+        }
+    }
+
+    class ExportButtonRenderer extends JButton implements TableCellRenderer {
+
+        public ExportButtonRenderer() {
+            setOpaque(true);
+            setBackground(new Color(220, 53, 69));
+            setBorderPainted(false);
+            setFocusPainted(false);
+            setText("");
+            setMargin(new Insets(0, 0, 0, 0));
+
+            try {
+                ImageIcon icon = new ImageIcon("src/assets/icon/akar-icons--file-white.png");
+                Image img = icon.getImage().getScaledInstance(20, 20, Image.SCALE_SMOOTH);
+                setIcon(new ImageIcon(img));
+            } catch (Exception e) {
+                setText("PDF");
+                setForeground(Color.WHITE);
+                setFont(new Font("Tahoma", Font.BOLD, 10));
+            }
+        }
+
+        @Override
+        public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int col) {
+            return this;
+        }
+    }
+
+    class ExportButtonEditor extends DefaultCellEditor {
+
+        protected JButton button;
+        private JTable table;
+
+        public ExportButtonEditor(JCheckBox checkBox) {
+            super(checkBox);
+            button = new JButton();
+            button.setOpaque(true);
+            button.setBackground(new Color(255, 0, 51));
+            button.setBorderPainted(false);
+            button.setFocusPainted(false);
+            button.setText(""); 
+            button.setMargin(new Insets(0, 0, 0, 0));
+
+            try {
+                ImageIcon icon = new ImageIcon("src/assets/icon/akar-icons--file-white.png");
+                Image img = icon.getImage().getScaledInstance(20, 20, Image.SCALE_SMOOTH);
+                button.setIcon(new ImageIcon(img));
+            } catch (Exception e) {
+                button.setText("PDF");
+                button.setForeground(Color.WHITE);
+            }
+
+            button.addActionListener(e -> {
+                int row = table.getSelectedRow();
+                if (row != -1) {
+                    String id = table.getModel().getValueAt(row, 1).toString();
+                    JFileChooser chooser = new JFileChooser();
+                    chooser.setDialogTitle("Simpan Laporan Data Pengaduan PDF");
+                    chooser.setSelectedFile(new File("laporan_pengaduan_" + id + ".pdf"));
+
+                    if (chooser.showSaveDialog(button) == JFileChooser.APPROVE_OPTION) {
+                        String path = chooser.getSelectedFile().getAbsolutePath();
+                        if (!path.toLowerCase().endsWith(".pdf")) {
+                            path += ".pdf";
+                        }
+                        pdfGeneratorPengaduanId.exportToPDF(id, path);
+                    }
+                }
+                fireEditingStopped();
+            });
+        }
+
+        @Override
+        public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row, int col) {
+            this.table = table;
+            return button;
+        }
+
+        @Override
+        public Object getCellEditorValue() {
+            return ""; 
         }
     }
 

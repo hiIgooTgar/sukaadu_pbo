@@ -8,7 +8,7 @@ a. Users admin :
 
 b. Users masyarakat :
   - email = igopbo@gmail.com
-  - password = igopbo123
+  - password = sukamaju
 
 
 Password ini bersifat MD5
