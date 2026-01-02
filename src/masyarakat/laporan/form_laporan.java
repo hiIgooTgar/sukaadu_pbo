@@ -8,11 +8,14 @@ import config.sessionValidator;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Cursor;
 import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.awt.Font;
 
 import javax.swing.ImageIcon;
 import java.awt.Image;
+import java.awt.Insets;
 import java.io.File;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -258,43 +261,63 @@ public class form_laporan extends javax.swing.JFrame {
             ResultSet rs = ps.executeQuery();
 
             if (rs.next()) {
-                JPanel panel = new JPanel(new BorderLayout(10, 10));
+                JPanel panel = new JPanel(new BorderLayout(15, 15));
                 panel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
-                JTextArea txtArea = new JTextArea("Tanggal Tanggapan : " + rs.getString("tgl_tanggapan")
+                JTextArea txtArea = new JTextArea("Diterima Pada: " + rs.getString("tgl_tanggapan")
                         + "\n\nIsi Tanggapan :\n" + rs.getString("isi_tanggapan"));
                 txtArea.setEditable(false);
                 txtArea.setLineWrap(true);
                 txtArea.setWrapStyleWord(true);
-                JScrollPane scroll = new JScrollPane(txtArea);
-                scroll.setPreferredSize(new Dimension(350, 150));
+                txtArea.setFont(new Font("Tahoma", Font.PLAIN, 13));
+                txtArea.setBackground(new Color(250, 250, 250));
+                txtArea.setMargin(new Insets(8, 8, 8, 8));
 
-                JButton btnExport = new JButton("EXPORT PDF");
+                JScrollPane scroll = new JScrollPane(txtArea);
+                scroll.setPreferredSize(new Dimension(400, 180));
+                scroll.setBorder(BorderFactory.createLineBorder(new Color(230, 230, 230)));
+
+                JButton btnExport = new JButton("EXPORT LAPORAN (PDF)");
                 btnExport.setBackground(new Color(255, 0, 51));
                 btnExport.setForeground(Color.WHITE);
                 btnExport.setFont(new Font("Tahoma", Font.BOLD, 12));
                 btnExport.setFocusPainted(false);
+                btnExport.setCursor(new Cursor(Cursor.HAND_CURSOR));
+                btnExport.setMargin(new Insets(8, 8, 8, 8));
 
                 try {
                     ImageIcon icon = new ImageIcon("src/assets/icon/akar-icons--file-white.png");
-                    Image img = icon.getImage().getScaledInstance(18, 18, Image.SCALE_SMOOTH);
+                    Image img = icon.getImage().getScaledInstance(20, 20, Image.SCALE_SMOOTH);
                     btnExport.setIcon(new ImageIcon(img));
+                    btnExport.setIconTextGap(12);
                 } catch (Exception e) {
                 }
 
+                JPanel btnPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+                btnPanel.setBorder(BorderFactory.createEmptyBorder(10, 0, 0, 0));
+                btnPanel.add(btnExport);
+
                 btnExport.addActionListener(e -> {
                     JFileChooser chooser = new JFileChooser();
+                    chooser.setDialogTitle("Pilih Lokasi Simpan");
                     chooser.setSelectedFile(new File("laporan_pengaduan_id_" + id + ".pdf"));
+
                     if (chooser.showSaveDialog(null) == JFileChooser.APPROVE_OPTION) {
-                        pdfGeneratorPengaduanId.exportToPDF(id, chooser.getSelectedFile().getAbsolutePath());
+                        String path = chooser.getSelectedFile().getAbsolutePath();
+                        if (!path.toLowerCase().endsWith(".pdf")) {
+                            path += ".pdf";
+                        }
+
+                        pdfGeneratorPengaduanId.exportToPDF(id, path);
+                        JOptionPane.showMessageDialog(null, "Laporan berhasil diunduh!");
                     }
                 });
 
-                panel.add(new JLabel("Detail Tanggapan:"), BorderLayout.NORTH);
+                panel.add(new JLabel("<html><b style='font-size:12px;'>Tanggapan Petugas:</b></html>"), BorderLayout.NORTH);
                 panel.add(scroll, BorderLayout.CENTER);
-                panel.add(btnExport, BorderLayout.SOUTH);
+                panel.add(btnPanel, BorderLayout.SOUTH);
 
-                JOptionPane.showMessageDialog(this, panel, "Informasi Tanggapan", JOptionPane.PLAIN_MESSAGE);
+                JOptionPane.showMessageDialog(this, panel, "Laporan Selesai", JOptionPane.PLAIN_MESSAGE);
             }
         } catch (Exception e) {
             e.printStackTrace();
