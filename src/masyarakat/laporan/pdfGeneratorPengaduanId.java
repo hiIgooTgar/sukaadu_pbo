@@ -125,7 +125,6 @@ public class pdfGeneratorPengaduanId {
             }
 
             document.close();
-            javax.swing.JOptionPane.showMessageDialog(null, "PDF Pengaduan Berhasil di-export");
         } catch (Exception e) {
             e.printStackTrace();
             javax.swing.JOptionPane.showMessageDialog(null, "Error PDF: " + e.getMessage());

@@ -300,7 +300,7 @@ public class form_laporan extends javax.swing.JFrame {
                 btnExport.addActionListener(e -> {
                     JFileChooser chooser = new JFileChooser();
                     chooser.setDialogTitle("Pilih Lokasi Simpan");
-                    chooser.setSelectedFile(new File("laporan_pengaduan_id_" + id + ".pdf"));
+                    chooser.setSelectedFile(new File("laporan_pengaduan_masyarkat_id_" + id + ".pdf"));
 
                     if (chooser.showSaveDialog(null) == JFileChooser.APPROVE_OPTION) {
                         String path = chooser.getSelectedFile().getAbsolutePath();
@@ -309,7 +309,7 @@ public class form_laporan extends javax.swing.JFrame {
                         }
 
                         pdfGeneratorPengaduanId.exportToPDF(id, path);
-                        JOptionPane.showMessageDialog(null, "Laporan berhasil diunduh!");
+                        JOptionPane.showMessageDialog(null, "PDF Pengaduan Berhasil di-export");
                     }
                 });
 
