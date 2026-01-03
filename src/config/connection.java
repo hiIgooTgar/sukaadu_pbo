@@ -22,7 +22,6 @@ public class connection {
     
     public static void main(String args[]) {
         System.out.println("Memulai uji koneksi...");
-        
         Connection testConn = null;
         try {
             testConn = getConnection();

@@ -574,8 +574,8 @@ public class form_profile extends javax.swing.JFrame {
             String pekerjaan = inputPekerjaan.getText().trim();
             String pernikahan = inputPernikahan.getSelectedItem().toString();
 
-            if (email.isEmpty() || nik.isEmpty() || nama.isEmpty()
-                    || tanggalLahir == null || rt.isEmpty() || rw.isEmpty() || pekerjaan.isEmpty() || pernikahan.isEmpty()) {
+            if (email.isEmpty() || nik.isEmpty() || nama.isEmpty() || tempatLahir.isEmpty() || tanggalLahir == null || agama.isEmpty() 
+                    || jenisKelamin.isEmpty() || rt.isEmpty() || rw.isEmpty() || pekerjaan.isEmpty() || pernikahan.isEmpty()) {
                 JOptionPane.showMessageDialog(this, "Semua data wajib diisi!", "Peringatan", JOptionPane.WARNING_MESSAGE);
                 return;
             }

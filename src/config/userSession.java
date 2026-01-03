@@ -151,15 +151,7 @@ public class userSession {
         return img_profile;
     }
 
-    public void login(int idUsers, String namaUsers, String emailUsers, String passwordUsers, String nikUsers, String role, int statusAccount) {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    public void login(int idUsers, String emailUsers, String passwordUsers, String nikUsers, String namaUsers, String tempatLahirUsers, String role, int statusAccount) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
     public void login(int idUsers, String emailUsers, String passwordUsers, String nikUsers, String namaUsers, String tempatLahirUsers, java.sql.Date tanggalLahirUsers, String agamaUsers, String jenisKelaminUsers, String rtUsers, String rwUsers, String pekerjaanUsers) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        throw new UnsupportedOperationException("Not supported yet."); 
     }
 }

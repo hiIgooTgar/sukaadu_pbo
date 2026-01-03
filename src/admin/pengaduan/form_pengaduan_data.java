@@ -95,6 +95,7 @@ public class form_pengaduan_data extends javax.swing.JFrame {
 
             tabelDataPengaduan.getColumnModel().getColumn(10).setCellRenderer(new ButtonRenderer());
             tabelDataPengaduan.getColumnModel().getColumn(10).setCellEditor(new ButtonEditor(new JCheckBox()));
+
             tabelDataPengaduan.getColumnModel().getColumn(11).setCellRenderer(new ButtonRenderer());
             tabelDataPengaduan.getColumnModel().getColumn(11).setCellEditor(new ButtonEditor(new JCheckBox()));
 
@@ -190,66 +191,52 @@ public class form_pengaduan_data extends javax.swing.JFrame {
         }
     }
 
-    private void bukaPopupTanggapan(String id) {
+    private void bukaPopupTanggapan(String id, String targetStatus) {
         try {
-            String sqlInfo = "SELECT judul_pengaduan FROM pengaduan WHERE id_pengaduan = ?";
             Connection conn = config.connection.getConnection();
+            String sqlInfo = "SELECT judul_pengaduan FROM pengaduan WHERE id_pengaduan = ?";
             PreparedStatement psInfo = conn.prepareStatement(sqlInfo);
             psInfo.setString(1, id);
             ResultSet rs = psInfo.executeQuery();
-
-            String judul = "";
-            if (rs.next()) {
-                judul = rs.getString("judul_pengaduan");
-            }
+            String judul = rs.next() ? rs.getString("judul_pengaduan") : "";
 
             JPanel panel = new JPanel(new BorderLayout(5, 10));
+            String instruksi = targetStatus.equals("tolak") ? "Alasan Penolakan:" : "Tanggapan Penyelesaian:";
+            String warna = targetStatus.equals("tolak") ? "red" : "blue";
 
-            String htmlInfo = "<html>"
-                    + "<body style='width: 320px;'>"
-                    + "<b>Judul pengaduan :</b> " + judul + "<br>"
-                    + "<hr>"
-                    + "<b>Tuliskan tanggapan anda:</b>"
-                    + "</body></html>";
-            JLabel labelInfo = new JLabel(htmlInfo);
+            String info = "<html><body style='width: 320px;'><b>Judul:</b> " + judul + "<br><hr>"
+                    + "<b style='color:" + warna + ";'>" + instruksi + "</b></body></html>";
 
-            JTextArea textArea = new JTextArea(6, 25);
+            JTextArea textArea = new JTextArea(5, 20);
             textArea.setLineWrap(true);
             textArea.setWrapStyleWord(true);
-            JScrollPane scrollPane = new JScrollPane(textArea);
-            panel.add(labelInfo, BorderLayout.NORTH);
-            panel.add(scrollPane, BorderLayout.CENTER);
 
-            int result = JOptionPane.showConfirmDialog(this, panel,
-                    "Berikan Tanggapan (ID: " + id + ")",
+            panel.add(new JLabel(info), BorderLayout.NORTH);
+            panel.add(new JScrollPane(textArea), BorderLayout.CENTER);
+
+            int res = JOptionPane.showConfirmDialog(this, panel, "Input Tanggapan",
                     JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
 
-            if (result == JOptionPane.OK_OPTION) {
-                String isiTanggapan = textArea.getText().trim();
-                if (isiTanggapan.isEmpty()) {
-                    JOptionPane.showMessageDialog(this, "Tanggapan tidak boleh kosong!", "Peringatan", JOptionPane.WARNING_MESSAGE);
+            if (res == JOptionPane.OK_OPTION) {
+                String isi = textArea.getText().trim();
+                if (isi.isEmpty()) {
+                    JOptionPane.showMessageDialog(this, "Tanggapan tidak boleh kosong!");
                     return;
                 }
 
-                int yakin = JOptionPane.showConfirmDialog(this,
-                        "Apakah Anda yakin ingin mengirim tanggapan ini?\nStatus akan berubah menjadi 'SELESAI'.",
-                        "Konfirmasi Kirim", JOptionPane.YES_NO_OPTION);
+                String sqlTanggapan = "INSERT INTO tanggapan (id_pengaduan, tgl_tanggapan, isi_tanggapan, id_users) VALUES (?, NOW(), ?, ?)";
+                PreparedStatement psT = conn.prepareStatement(sqlTanggapan);
+                psT.setString(1, id);
+                psT.setString(2, isi);
+                psT.setInt(3, config.userSession.getInstance().getIdUsers());
 
-                if (yakin == JOptionPane.YES_OPTION) {
-                    String sqlInsert = "INSERT INTO tanggapan (id_pengaduan, tgl_tanggapan, isi_tanggapan, id_users) VALUES (?, NOW(), ?, ?)";
-                    PreparedStatement psInsert = conn.prepareStatement(sqlInsert);
-                    psInsert.setString(1, id);
-                    psInsert.setString(2, isiTanggapan);
-                    psInsert.setInt(3, config.userSession.getInstance().getIdUsers());
+                if (psT.executeUpdate() > 0) {
+                    updateStatus(id, targetStatus);
 
-                    if (psInsert.executeUpdate() > 0) {
-                        updateStatus(id, "selesai");
-                        JOptionPane.showMessageDialog(this, "Tanggapan berhasil dikirim dan status diperbarui!", "Sukses", JOptionPane.INFORMATION_MESSAGE);
-                    }
+                    JOptionPane.showMessageDialog(this, "Berhasil memberikan tanggapan!");
                 }
             }
         } catch (Exception e) {
-            JOptionPane.showMessageDialog(this, "Terjadi kesalahan: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
             e.printStackTrace();
         }
     }
@@ -662,7 +649,6 @@ public class form_pengaduan_data extends javax.swing.JFrame {
     // End of variables declaration//GEN-END:variables
 
     class ButtonRenderer extends JButton implements TableCellRenderer {
-
         public ButtonRenderer() {
             setOpaque(true);
         }
@@ -683,34 +669,36 @@ public class form_pengaduan_data extends javax.swing.JFrame {
         public ButtonEditor(JCheckBox checkBox) {
             super(checkBox);
             button = new JButton();
+            button.setOpaque(true);
             button.addActionListener(e -> {
+                fireEditingStopped();
                 int row = table.getSelectedRow();
-                int viewCol = table.getSelectedColumn();
-                int col = table.convertColumnIndexToModel(viewCol);
+                int col = table.getSelectedColumn();
 
                 if (row != -1) {
-                    String id = table.getModel().getValueAt(row, 1).toString();
-                    String name = table.getModel().getValueAt(row, 3).toString();
+                    String id = table.getValueAt(row, 1).toString();
+                    String name = table.getValueAt(row, 3).toString();
+                    String status = table.getValueAt(row, 7).toString().toLowerCase();
 
                     if (col == 11) {
                         showDetailPengaduan(row);
                     } else if (col == 10) {
-                        String status = table.getModel().getValueAt(row, 7).toString().toLowerCase();
                         if (status.equals("belum")) {
                             Object[] op = {"Terima", "Tolak", "Batal"};
-                            int choice = JOptionPane.showOptionDialog(null, "Proses Pengaduan dari: " + name, "Konfirmasi Admin",
-                                    JOptionPane.DEFAULT_OPTION, JOptionPane.QUESTION_MESSAGE, null, op, op[0]);
+                            int choice = JOptionPane.showOptionDialog(null,
+                                    "Proses Pengaduan dari: " + name, "Konfirmasi Admin",
+                                    JOptionPane.DEFAULT_OPTION, JOptionPane.QUESTION_MESSAGE,
+                                    null, op, op[0]);
                             if (choice == 0) {
                                 updateStatus(id, "proses");
                             } else if (choice == 1) {
-                                updateStatus(id, "tolak");
+                                bukaPopupTanggapan(id, "tolak");
                             }
                         } else if (status.equals("proses")) {
-                            bukaPopupTanggapan(id);
+                            bukaPopupTanggapan(id, "selesai");
                         }
                     }
                 }
-                fireEditingStopped();
             });
         }
 

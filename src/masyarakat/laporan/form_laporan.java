@@ -31,6 +31,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
+import javax.swing.SwingUtilities;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 
@@ -52,7 +53,7 @@ public class form_laporan extends javax.swing.JFrame {
             }
         };
 
-        model.addColumn("ID");
+        model.addColumn("No");
         model.addColumn("ID Pengaduan");
         model.addColumn("Tanggal");
         model.addColumn("Judul");
@@ -64,14 +65,12 @@ public class form_laporan extends javax.swing.JFrame {
 
         try {
             int no = 1;
-            int idUsers = config.userSession.getInstance().getIdUsers();
+            int idUsers = userSession.getInstance().getIdUsers();
             Connection conn = config.connection.getConnection();
-            String sql = "SELECT p.id_pengaduan, p.tgl_pegaduan, p.judul_pengaduan, p.deskripsi_pengaduan, "
-                    + "k.nama_kategori, p.foto_pengaduan, p.status "
-                    + "FROM pengaduan p "
+            String sql = "SELECT p.*, k.nama_kategori FROM pengaduan p "
                     + "JOIN kategori_pengaduan k ON p.id_kategori_pengaduan = k.id_kategori_pengaduan "
-                    + "WHERE p.id_users = ? AND p.judul_pengaduan LIKE ? "
-                    + "ORDER BY p.id_pengaduan DESC";
+                    + "WHERE p.id_users = ? AND p.judul_pengaduan LIKE ? ORDER BY p.id_pengaduan DESC";
+
             PreparedStatement ps = conn.prepareStatement(sql);
             ps.setInt(1, idUsers);
             ps.setString(2, "%" + keyword + "%");
@@ -87,19 +86,21 @@ public class form_laporan extends javax.swing.JFrame {
                     rs.getString("nama_kategori"),
                     rs.getString("foto_pengaduan"),
                     rs.getString("status"),
-                    "Lihat Tanggapan"
+                    "Aksi"
                 });
             }
 
             tabelLaporanMasyarakat.setModel(model);
             tabelLaporanMasyarakat.setRowHeight(80);
+
             tabelLaporanMasyarakat.getColumnModel().getColumn(1).setMinWidth(0);
             tabelLaporanMasyarakat.getColumnModel().getColumn(1).setMaxWidth(0);
             tabelLaporanMasyarakat.getColumnModel().getColumn(1).setWidth(0);
+
             setTableRenderers();
             setTableButtonListener();
         } catch (Exception e) {
-            JOptionPane.showMessageDialog(this, "Pencarian gagal: " + e.getMessage());
+            JOptionPane.showMessageDialog(this, "Gagal memuat data: " + e.getMessage());
         }
     }
 
@@ -139,7 +140,7 @@ public class form_laporan extends javax.swing.JFrame {
                     } else if ("selesai".equalsIgnoreCase(status)) {
                         c.setBackground(Color.GREEN);
                         c.setForeground(Color.BLACK);
-                    } else if ("belum".equalsIgnoreCase(status)) {
+                    } else if ("tolak".equalsIgnoreCase(status)) {
                         c.setBackground(Color.RED);
                         c.setForeground(Color.WHITE);
                     } else {
@@ -186,7 +187,7 @@ public class form_laporan extends javax.swing.JFrame {
                     btn.setBackground(new Color(40, 167, 69));
                     btn.setForeground(Color.WHITE);
                 } else if (status.equals("tolak")) {
-                    btn.setText("Hapus Pengaduan");
+                    btn.setText("Lihat Tanggapan");
                     btn.setBackground(new Color(255, 51, 51));
                     btn.setForeground(Color.WHITE);
                 }
@@ -204,31 +205,29 @@ public class form_laporan extends javax.swing.JFrame {
     }
 
     private void setTableButtonListener() {
+        for (java.awt.event.MouseListener ml : tabelLaporanMasyarakat.getMouseListeners()) {
+            tabelLaporanMasyarakat.removeMouseListener(ml);
+        }
+
         tabelLaporanMasyarakat.addMouseListener(new java.awt.event.MouseAdapter() {
             @Override
             public void mouseClicked(java.awt.event.MouseEvent evt) {
-                int row = tabelLaporanMasyarakat.getSelectedRow();
-                int col = tabelLaporanMasyarakat.getSelectedColumn();
+                int row = tabelLaporanMasyarakat.rowAtPoint(evt.getPoint());
+                int col = tabelLaporanMasyarakat.columnAtPoint(evt.getPoint());
 
-                if (col == 8) {
+                if (row >= 0 && col == 8) {
+                    String id = tabelLaporanMasyarakat.getValueAt(row, 1).toString();
                     String status = tabelLaporanMasyarakat.getValueAt(row, 7).toString().toLowerCase();
-                    String idPengaduan = tabelLaporanMasyarakat.getValueAt(row, 1).toString();
 
-                    if (status.equals("belum") || status.equals("tolak")) {
-                        int confirm = JOptionPane.showConfirmDialog(null,
-                                "Apakah Anda yakin ingin menghapus pengaduan ini?",
-                                "Konfirmasi Hapus",
-                                JOptionPane.YES_NO_OPTION,
-                                JOptionPane.WARNING_MESSAGE);
-
-                        if (confirm == JOptionPane.YES_OPTION) {
-                            prosesHapus(idPengaduan);
+                    if (status.equals("tolak") || status.equals("selesai")) {
+                        tampilkanPopupTanggapan(id, status);
+                    } else if (status.equals("belum")) {
+                        int conf = JOptionPane.showConfirmDialog(null, "Hapus pengaduan ini?", "Konfirmasi", JOptionPane.YES_NO_OPTION);
+                        if (conf == JOptionPane.YES_OPTION) {
+                            prosesHapusSederhana(id);
                         }
-
-                    } else if (status.equals("proses")) {
-                        JOptionPane.showMessageDialog(null, "Laporan Anda sedang diproses oleh petugas. Mohon ditunggu.");
-                    } else if (status.equals("selesai")) {
-                        tampilkanPopupTanggapan(idPengaduan);
+                    } else {
+                        JOptionPane.showMessageDialog(null, "Laporan sedang dalam proses petugas.");
                     }
                 }
             }
@@ -252,9 +251,9 @@ public class form_laporan extends javax.swing.JFrame {
         }
     }
 
-    private void tampilkanPopupTanggapan(String id) {
+    private void tampilkanPopupTanggapan(String id, String status) {
         try {
-            Connection conn = config.connection.getConnection();
+            Connection conn =  config.connection.getConnection();
             String sql = "SELECT tgl_tanggapan, isi_tanggapan FROM tanggapan WHERE id_pengaduan = ?";
             PreparedStatement ps = conn.prepareStatement(sql);
             ps.setString(1, id);
@@ -264,63 +263,110 @@ public class form_laporan extends javax.swing.JFrame {
                 JPanel panel = new JPanel(new BorderLayout(15, 15));
                 panel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
-                JTextArea txtArea = new JTextArea("Diterima Pada: " + rs.getString("tgl_tanggapan")
-                        + "\n\nIsi Tanggapan :\n" + rs.getString("isi_tanggapan"));
-                txtArea.setEditable(false);
-                txtArea.setLineWrap(true);
-                txtArea.setWrapStyleWord(true);
-                txtArea.setFont(new Font("Tahoma", Font.PLAIN, 13));
-                txtArea.setBackground(new Color(250, 250, 250));
-                txtArea.setMargin(new Insets(8, 8, 8, 8));
+                String judulStr = status.equalsIgnoreCase("tolak") ? "Alasan Penolakan" : "Tanggapan Petugas SukaAdu";
+                Color temaWarna = status.equalsIgnoreCase("tolak") ? Color.RED : new Color(0, 153, 51);
 
-                JScrollPane scroll = new JScrollPane(txtArea);
-                scroll.setPreferredSize(new Dimension(400, 180));
+                JLabel lblTitle = new JLabel("<html><b style='color:rgb(" + temaWarna.getRed() + "," + temaWarna.getGreen() + "," + temaWarna.getBlue() + ");'>" + judulStr + "</b></html>");
+
+                JTextArea txt = new JTextArea("Diterima pada : " + rs.getString("tgl_tanggapan") + "\n\n" + rs.getString("isi_tanggapan"));
+                txt.setEditable(false);
+                txt.setLineWrap(true);
+                txt.setWrapStyleWord(true);
+                txt.setFont(new Font("Tahoma", Font.PLAIN, 13));
+                txt.setBackground(new Color(250, 250, 250));
+                txt.setMargin(new Insets(8, 8, 8, 8));
+
+                JScrollPane scroll = new JScrollPane(txt);
                 scroll.setBorder(BorderFactory.createLineBorder(new Color(230, 230, 230)));
+                scroll.setPreferredSize(new Dimension(400, 180));
 
-                JButton btnExport = new JButton("EXPORT LAPORAN (PDF)");
-                btnExport.setBackground(new Color(255, 0, 51));
-                btnExport.setForeground(Color.WHITE);
-                btnExport.setFont(new Font("Tahoma", Font.BOLD, 12));
-                btnExport.setFocusPainted(false);
-                btnExport.setCursor(new Cursor(Cursor.HAND_CURSOR));
-                btnExport.setMargin(new Insets(8, 8, 8, 8));
-
-                try {
-                    ImageIcon icon = new ImageIcon("src/assets/icon/akar-icons--file-white.png");
-                    Image img = icon.getImage().getScaledInstance(20, 20, Image.SCALE_SMOOTH);
-                    btnExport.setIcon(new ImageIcon(img));
-                    btnExport.setIconTextGap(12);
-                } catch (Exception e) {
-                }
+                panel.add(lblTitle, BorderLayout.NORTH);
+                panel.add(scroll, BorderLayout.CENTER);
 
                 JPanel btnPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
-                btnPanel.setBorder(BorderFactory.createEmptyBorder(10, 0, 0, 0));
-                btnPanel.add(btnExport);
 
-                btnExport.addActionListener(e -> {
-                    JFileChooser chooser = new JFileChooser();
-                    chooser.setDialogTitle("Pilih Lokasi Simpan");
-                    chooser.setSelectedFile(new File("laporan_pengaduan_masyarkat_id_" + id + ".pdf"));
-
-                    if (chooser.showSaveDialog(null) == JFileChooser.APPROVE_OPTION) {
-                        String path = chooser.getSelectedFile().getAbsolutePath();
-                        if (!path.toLowerCase().endsWith(".pdf")) {
-                            path += ".pdf";
+                if (status.equalsIgnoreCase("tolak")) {
+                    JButton btnHapus = new JButton("Hapus Data Permanen");
+                    btnHapus.setBackground(Color.RED);
+                    btnHapus.setForeground(Color.WHITE);
+                    btnHapus.setFont(new Font("Tahoma", Font.BOLD, 11));
+                    btnHapus.addActionListener(e -> {
+                        int c = JOptionPane.showConfirmDialog(null, "Hapus permanen pengaduan & tanggapan?", "Peringatan", JOptionPane.YES_NO_OPTION);
+                        if (c == JOptionPane.YES_OPTION) {
+                            hapusRelasi(id);
+                            SwingUtilities.getWindowAncestor(btnHapus).dispose();
                         }
+                    });
+                    btnPanel.add(btnHapus);
+                } else {
+                    JButton btnPdf = new JButton("Export Laporan (PDF)");
+                    btnPdf.setBackground(new Color(220, 53, 69));
+                    btnPdf.setForeground(Color.WHITE);
+                    btnPdf.setFont(new Font("Tahoma", Font.BOLD, 11));
 
-                        pdfGeneratorPengaduanId.exportToPDF(id, path);
-                        JOptionPane.showMessageDialog(null, "PDF Pengaduan Berhasil di-export");
+                    try {
+                        ImageIcon icon = new ImageIcon("src/assets/icon/akar-icons--file-white.png");
+                        Image img = icon.getImage().getScaledInstance(18, 18, Image.SCALE_SMOOTH);
+                        btnPdf.setIcon(new ImageIcon(img));
+                        btnPdf.setIconTextGap(10);
+                    } catch (Exception ex) {
                     }
-                });
 
-                panel.add(new JLabel("<html><b style='font-size:12px;'>Tanggapan Petugas:</b></html>"), BorderLayout.NORTH);
-                panel.add(scroll, BorderLayout.CENTER);
+                    btnPdf.addActionListener(e -> {
+                        JFileChooser chooser = new JFileChooser();
+                        chooser.setSelectedFile(new File("laporan_pengaduan_masyarkat_id_" + id + ".pdf"));
+                        if (chooser.showSaveDialog(null) == JFileChooser.APPROVE_OPTION) {
+                            pdfGeneratorPengaduanId.exportToPDF(id, chooser.getSelectedFile().getAbsolutePath());
+                            JOptionPane.showMessageDialog(null, "PDF Pengaduan Berhasil di-export");
+                        }
+                    });
+                    btnPanel.add(btnPdf);
+                }
+
                 panel.add(btnPanel, BorderLayout.SOUTH);
-
-                JOptionPane.showMessageDialog(this, panel, "Laporan Selesai", JOptionPane.PLAIN_MESSAGE);
+                JOptionPane.showMessageDialog(this, panel, "Detail Status Laporan Pengaduan", JOptionPane.PLAIN_MESSAGE);
             }
         } catch (Exception e) {
             e.printStackTrace();
+        }
+    }
+
+    private void hapusRelasi(String id) {
+        try {
+            Connection conn =  config.connection.getConnection();
+            conn.setAutoCommit(false); // Transaksi
+            try {
+                PreparedStatement ps1 = conn.prepareStatement("DELETE FROM tanggapan WHERE id_pengaduan = ?");
+                ps1.setString(1, id);
+                ps1.executeUpdate();
+
+                PreparedStatement ps2 = conn.prepareStatement("DELETE FROM pengaduan WHERE id_pengaduan = ?");
+                ps2.setString(1, id);
+                ps2.executeUpdate();
+
+                conn.commit();
+                cariLaporan("");
+                JOptionPane.showMessageDialog(this, "Laporan dan tanggapan berhasil dihapus.");
+            } catch (Exception ex) {
+                conn.rollback();
+                throw ex;
+            }
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "Gagal menghapus: " + e.getMessage());
+        }
+    }
+
+    private void prosesHapusSederhana(String id) {
+        try {
+            Connection conn = config.connection.getConnection();
+            String sql = "DELETE FROM pengaduan WHERE id_pengaduan = ?";
+            PreparedStatement ps = conn.prepareStatement(sql);
+            ps.setString(1, id);
+            ps.executeUpdate();
+            cariLaporan("");
+            JOptionPane.showMessageDialog(this, "Pengaduan berhasil dihapus.");
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "Gagal: " + e.getMessage());
         }
     }
 

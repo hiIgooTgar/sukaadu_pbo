@@ -61,7 +61,8 @@ public class form_rekap_laporan extends javax.swing.JFrame {
                     + "JOIN users u ON p.id_users = u.id_users "
                     + "JOIN kategori_pengaduan k ON p.id_kategori_pengaduan = k.id_kategori_pengaduan "
                     + "LEFT JOIN tanggapan t ON p.id_pengaduan = t.id_pengaduan "
-                    + "WHERE p.judul_pengaduan LIKE ? OR u.nama LIKE ? "
+                    + "WHERE p.status = 'selesai' " 
+                    + "AND (p.judul_pengaduan LIKE ? OR u.nama LIKE ?) " 
                     + "ORDER BY p.id_pengaduan DESC";
 
             Connection conn = config.connection.getConnection();
@@ -735,7 +736,7 @@ public class form_rekap_laporan extends javax.swing.JFrame {
             button.setBackground(new Color(255, 0, 51));
             button.setBorderPainted(false);
             button.setFocusPainted(false);
-            button.setText(""); 
+            button.setText("");
             button.setMargin(new Insets(0, 0, 0, 0));
 
             try {
@@ -775,7 +776,7 @@ public class form_rekap_laporan extends javax.swing.JFrame {
 
         @Override
         public Object getCellEditorValue() {
-            return ""; 
+            return "";
         }
     }
 
