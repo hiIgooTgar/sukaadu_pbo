@@ -5,6 +5,10 @@ import masyarakat.pengaduan.*;
 
 import config.userSession;
 import config.sessionValidator;
+import java.awt.BorderLayout;
+import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.Color;
 
 import javax.swing.JFileChooser;
 import javax.swing.ImageIcon;
@@ -19,8 +23,13 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.text.SimpleDateFormat;
+import javax.swing.BorderFactory;
+import javax.swing.JEditorPane;
+import javax.swing.JLabel;
 
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 
 public class form_pengaduan extends javax.swing.JFrame {
 
@@ -54,7 +63,7 @@ public class form_pengaduan extends javax.swing.JFrame {
             JOptionPane.showMessageDialog(this, "Gagal memuat kategori: " + e.getMessage());
         }
     }
-    
+
     private void redirectToLaporanPengaduan() {
         try {
             masyarakat.laporan.form_laporan laporanPengaduanForm = new masyarakat.laporan.form_laporan();
@@ -64,8 +73,65 @@ public class form_pengaduan extends javax.swing.JFrame {
             JOptionPane.showMessageDialog(this, "Gagal redirect ke pengaduan: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
-    
-     private void redirectToProfile() {
+
+    private void tampilkanInfoKategori() {
+        JPanel panel = new JPanel(new BorderLayout(10, 10));
+        panel.setPreferredSize(new Dimension(480, 350));
+        panel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+
+        JLabel lblHeader = new JLabel("Penjelasan Kategori Pengaduan");
+        lblHeader.setFont(new Font("Tahoma", Font.BOLD, 16));
+        lblHeader.setForeground(new Color(0, 102, 204));
+        lblHeader.setHorizontalAlignment(JLabel.CENTER);
+        panel.add(lblHeader, BorderLayout.NORTH);
+
+        JEditorPane contentPane = new JEditorPane();
+        contentPane.setContentType("text/html");
+        contentPane.setEditable(false);
+        contentPane.setBackground(new Color(250, 250, 250));
+
+        StringBuilder htmlContent = new StringBuilder();
+        htmlContent.append("<html><body style='font-family:Tahoma; font-size:10pt; margin:10px;'>");
+
+        try {
+            Connection conn = config.connection.getConnection();
+            String sql = "SELECT nama_kategori, deskripsi FROM kategori_pengaduan ORDER BY nama_kategori ASC";
+            Statement st = conn.createStatement();
+            ResultSet rs = st.executeQuery(sql);
+
+            int count = 1;
+            while (rs.next()) {
+                String nama = rs.getString("nama_kategori");
+                String desc = rs.getString("deskripsi");
+                htmlContent.append("<b style='color:#333; font-size:11px;'>")
+                        .append(count).append(". ")
+                        .append(nama.toUpperCase())
+                        .append("</b>")
+                        .append("<p style='margin-bottom:15px; color:#555; font-size:10px; margin-top: 2px;'>")
+                        .append(desc != null ? desc : "Tidak ada deskripsi tersedia.")
+                        .append("</p>");
+                count++;
+            }
+
+            if (count == 1) {
+                htmlContent.append("<i>Belum ada data kategori.</i>");
+            }
+
+        } catch (Exception e) {
+            htmlContent.append("<b style='color:red;'>Gagal memuat data:</b> ").append(e.getMessage());
+        }
+
+        htmlContent.append("</body></html>");
+        contentPane.setText(htmlContent.toString());
+        contentPane.setCaretPosition(0); 
+
+        JScrollPane scroll = new JScrollPane(contentPane);
+        scroll.setBorder(BorderFactory.createLineBorder(new Color(230, 230, 230)));
+        panel.add(scroll, BorderLayout.CENTER);
+        JOptionPane.showMessageDialog(this, panel, "Informasi Kategori Pengaduan", JOptionPane.PLAIN_MESSAGE);
+    }
+
+    private void redirectToProfile() {
         try {
             masyarakat.profile.form_profile profileForm = new masyarakat.profile.form_profile();
             profileForm.setVisible(true);
@@ -113,6 +179,7 @@ public class form_pengaduan extends javax.swing.JFrame {
         navLaporan = new javax.swing.JLabel();
         jScrollPane2 = new javax.swing.JScrollPane();
         inputDeskripsi = new javax.swing.JTextArea();
+        informationKategori = new javax.swing.JLabel();
 
         jComboBox1.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
 
@@ -274,6 +341,15 @@ public class form_pengaduan extends javax.swing.JFrame {
         inputDeskripsi.setRows(5);
         jScrollPane2.setViewportView(inputDeskripsi);
 
+        informationKategori.setFont(new java.awt.Font("Tahoma", 0, 17)); // NOI18N
+        informationKategori.setForeground(new java.awt.Color(0, 153, 255));
+        informationKategori.setText("Info");
+        informationKategori.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                informationKategoriMouseClicked(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -301,12 +377,15 @@ public class form_pengaduan extends javax.swing.JFrame {
                                     .addComponent(inputTanggal, javax.swing.GroupLayout.PREFERRED_SIZE, 279, javax.swing.GroupLayout.PREFERRED_SIZE))
                                 .addGap(18, 18, 18)
                                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(jLabel4)
-                                    .addComponent(selectKategori, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                                    .addComponent(selectKategori, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                    .addGroup(layout.createSequentialGroup()
+                                        .addComponent(jLabel4)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                        .addComponent(informationKategori))))
                             .addComponent(jLabel6)
                             .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 599, javax.swing.GroupLayout.PREFERRED_SIZE)))
                     .addComponent(jLabel1))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap(93, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -331,10 +410,12 @@ public class form_pengaduan extends javax.swing.JFrame {
                         .addGap(8, 8, 8)
                         .addComponent(inputJudul, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(jLabel4)
-                            .addComponent(jLabel5))
-                        .addGap(10, 10, 10)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jLabel5)
+                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, 22, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addComponent(informationKategori)))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                             .addComponent(selectKategori)
                             .addComponent(inputTanggal, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE))
@@ -364,7 +445,7 @@ public class form_pengaduan extends javax.swing.JFrame {
                         + "Silakan lengkapi profil Anda terlebih dahulu di menu Profile.",
                         "Akses Ditolak", JOptionPane.ERROR_MESSAGE);
                 redirectToProfile();
-                return; 
+                return;
             }
 
             String judul = inputJudul.getText().trim();
@@ -521,6 +602,10 @@ public class form_pengaduan extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_navBerandaMouseClicked
 
+    private void informationKategoriMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_informationKategoriMouseClicked
+        tampilkanInfoKategori();
+    }//GEN-LAST:event_informationKategoriMouseClicked
+
     public static void main(String args[]) {
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
@@ -534,6 +619,7 @@ public class form_pengaduan extends javax.swing.JFrame {
     private javax.swing.JButton btn_sign_out;
     private javax.swing.JButton chooseGambar;
     private javax.swing.JLabel imageElement;
+    private javax.swing.JLabel informationKategori;
     private javax.swing.JTextArea inputDeskripsi;
     private javax.swing.JTextField inputJudul;
     private com.toedter.calendar.JDateChooser inputTanggal;

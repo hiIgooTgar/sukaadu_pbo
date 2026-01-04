@@ -2,13 +2,13 @@ package masyarakat.laporan;
 
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.apache.poi.xssf.usermodel.XSSFCellStyle; // Penting untuk warna kustom
-import org.apache.poi.xssf.usermodel.XSSFColor;     // Penting untuk warna kustom
+import org.apache.poi.xssf.usermodel.XSSFCellStyle;
+import org.apache.poi.xssf.usermodel.XSSFColor;   
 import javax.swing.table.DefaultTableModel;
 import javax.swing.JOptionPane;
 import java.io.FileOutputStream;
 import java.io.File;
-import java.awt.Color; // Untuk definisi warna RGB
+import java.awt.Color; 
 
 public class excelGeneratorPengaduan {
 

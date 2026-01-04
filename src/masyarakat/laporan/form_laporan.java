@@ -12,6 +12,7 @@ import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
+import java.awt.GridBagLayout;
 
 import javax.swing.ImageIcon;
 import java.awt.Image;
@@ -34,6 +35,7 @@ import javax.swing.JTextArea;
 import javax.swing.SwingUtilities;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableCellRenderer;
 
 public class form_laporan extends javax.swing.JFrame {
 
@@ -62,6 +64,7 @@ public class form_laporan extends javax.swing.JFrame {
         model.addColumn("Foto");
         model.addColumn("Status");
         model.addColumn("Aksi");
+        model.addColumn("Detail");
 
         try {
             int no = 1;
@@ -86,13 +89,13 @@ public class form_laporan extends javax.swing.JFrame {
                     rs.getString("nama_kategori"),
                     rs.getString("foto_pengaduan"),
                     rs.getString("status"),
-                    "Aksi"
+                    "AKSI",
+                    "DETAIL"
                 });
             }
 
             tabelLaporanMasyarakat.setModel(model);
             tabelLaporanMasyarakat.setRowHeight(80);
-
             tabelLaporanMasyarakat.getColumnModel().getColumn(1).setMinWidth(0);
             tabelLaporanMasyarakat.getColumnModel().getColumn(1).setMaxWidth(0);
             tabelLaporanMasyarakat.getColumnModel().getColumn(1).setWidth(0);
@@ -100,8 +103,55 @@ public class form_laporan extends javax.swing.JFrame {
             setTableRenderers();
             setTableButtonListener();
         } catch (Exception e) {
-            JOptionPane.showMessageDialog(this, "Gagal memuat data: " + e.getMessage());
+            JOptionPane.showMessageDialog(this, "Error: " + e.getMessage());
         }
+    }
+
+    private void tampilkanPopupDetail(int row) {
+        JPanel panel = new JPanel(new BorderLayout(10, 10));
+        panel.setPreferredSize(new Dimension(350, 400));
+        panel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+
+        String judul = tabelLaporanMasyarakat.getValueAt(row, 3).toString();
+        String tgl = tabelLaporanMasyarakat.getValueAt(row, 2).toString();
+        String kategori = tabelLaporanMasyarakat.getValueAt(row, 5).toString();
+        String deskripsi = tabelLaporanMasyarakat.getValueAt(row, 4).toString();
+        String fotoName = tabelLaporanMasyarakat.getValueAt(row, 6).toString();
+
+        JLabel lblHeader = new JLabel("Detail Laporan Pengaduan Anda");
+        lblHeader.setFont(new Font("Tahoma", Font.BOLD, 14));
+
+        JTextArea txtDetail = new JTextArea(
+                "Judul: " + judul + "\n"
+                + "Tanggal: " + tgl + "\n"
+                + "Kategori: " + kategori + "\n\n"
+                + "Deskripsi:\n" + deskripsi
+        );
+
+        txtDetail.setEditable(false);
+        txtDetail.setLineWrap(true);
+        txtDetail.setWrapStyleWord(true);
+        txtDetail.setFont(new Font("Tahoma", Font.PLAIN, 13));
+        txtDetail.setBackground(new Color(250, 250, 250));
+        txtDetail.setMargin(new Insets(8, 8, 8, 8));
+
+        JLabel lblFoto = new JLabel();
+        lblFoto.setHorizontalAlignment(JLabel.CENTER);
+        try {
+            String path = "src/uploads/pengaduan/" + fotoName;
+            ImageIcon imgIcon = new ImageIcon(path);
+            Image img = imgIcon.getImage().getScaledInstance(330, 190, Image.SCALE_SMOOTH);
+            lblFoto.setIcon(new ImageIcon(img));
+        } catch (Exception e) {
+            lblFoto.setText("Foto tidak ditemukan");
+        }
+
+        JPanel centerPanel = new JPanel(new BorderLayout(5, 5));
+        centerPanel.add(new JScrollPane(txtDetail), BorderLayout.CENTER);
+        centerPanel.add(lblFoto, BorderLayout.SOUTH);
+        panel.add(lblHeader, BorderLayout.NORTH);
+        panel.add(centerPanel, BorderLayout.CENTER);
+        JOptionPane.showMessageDialog(this, panel, "Detail Pengaduan", JOptionPane.PLAIN_MESSAGE);
     }
 
     private void setTableRenderers() {
@@ -109,14 +159,10 @@ public class form_laporan extends javax.swing.JFrame {
             @Override
             public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
                 JLabel label = new JLabel();
-                if (value != null) {
+                try {
                     String path = "src/uploads/pengaduan/" + value.toString();
-                    File file = new File(path);
-                    if (file.exists()) {
-                        ImageIcon imgIcon = new ImageIcon(path);
-                        Image img = imgIcon.getImage().getScaledInstance(100, 70, Image.SCALE_SMOOTH);
-                        label.setIcon(new ImageIcon(img));
-                    }
+                    label.setIcon(new ImageIcon(new ImageIcon(path).getImage().getScaledInstance(100, 70, Image.SCALE_SMOOTH)));
+                } catch (Exception e) {
                 }
                 label.setHorizontalAlignment(JLabel.CENTER);
                 return label;
@@ -127,81 +173,33 @@ public class form_laporan extends javax.swing.JFrame {
             @Override
             public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
                 Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
-                setHorizontalAlignment(JLabel.CENTER);
                 if (value != null) {
-                    String status = value.toString();
-                    setText(status.toUpperCase());
-                    if ("belum".equalsIgnoreCase(status)) {
-                        c.setBackground(Color.RED);
-                        c.setForeground(Color.WHITE);
-                    } else if ("proses".equalsIgnoreCase(status)) {
-                        c.setBackground(Color.YELLOW);
-                        c.setForeground(Color.BLACK);
-                    } else if ("selesai".equalsIgnoreCase(status)) {
-                        c.setBackground(Color.GREEN);
-                        c.setForeground(Color.BLACK);
-                    } else if ("tolak".equalsIgnoreCase(status)) {
-                        c.setBackground(Color.RED);
-                        c.setForeground(Color.WHITE);
+                    JLabel label = (JLabel) c;
+                    label.setText(value.toString().toUpperCase());
+                    label.setFont(new Font("Tahoma", Font.BOLD, 11));
+                    label.setHorizontalAlignment(JLabel.CENTER);
+                    label.setOpaque(true);
+
+                    String s = value.toString().toLowerCase();
+                    if (s.equals("selesai")) {
+                        label.setBackground(new Color(40, 167, 69));
+                        label.setForeground(Color.WHITE);
+                    } else if (s.equals("proses")) {
+                        label.setBackground(Color.YELLOW);
+                        label.setForeground(Color.BLACK);
                     } else {
-                        c.setBackground(Color.WHITE);
-                        c.setForeground(Color.BLACK);
+                        label.setBackground(new Color(255, 51, 51));
+                        label.setForeground(Color.WHITE);
                     }
                 }
-
                 if (isSelected) {
                     c.setBackground(table.getSelectionBackground());
-                    c.setForeground(table.getSelectionForeground());
                 }
                 return c;
             }
         });
-
-        tabelLaporanMasyarakat.getColumnModel().getColumn(8).setCellRenderer(new DefaultTableCellRenderer() {
-            @Override
-            public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
-                JPanel panel = new JPanel(new java.awt.GridBagLayout());
-                panel.setOpaque(true);
-                panel.setBorder(javax.swing.BorderFactory.createEmptyBorder(5, 15, 5, 15));
-
-                JLabel btn = new JLabel();
-                btn.setOpaque(true);
-                btn.setHorizontalAlignment(JLabel.CENTER);
-                btn.setFont(new Font("Tahoma", Font.PLAIN, 12));
-
-                btn.setPreferredSize(new Dimension(130, 30));
-                btn.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED));
-
-                String status = table.getValueAt(row, 7).toString().toLowerCase();
-
-                if (status.equals("belum")) {
-                    btn.setText("Hapus Pengaduan");
-                    btn.setBackground(new Color(255, 51, 51));
-                    btn.setForeground(Color.WHITE);
-                } else if (status.equals("proses")) {
-                    btn.setText("Belum Ada Tanggapan");
-                    btn.setBackground(new Color(255, 204, 0));
-                    btn.setForeground(Color.BLACK);
-                } else if (status.equals("selesai")) {
-                    btn.setText("Lihat Tanggapan");
-                    btn.setBackground(new Color(40, 167, 69));
-                    btn.setForeground(Color.WHITE);
-                } else if (status.equals("tolak")) {
-                    btn.setText("Lihat Tanggapan");
-                    btn.setBackground(new Color(255, 51, 51));
-                    btn.setForeground(Color.WHITE);
-                }
-
-                if (isSelected) {
-                    panel.setBackground(table.getSelectionBackground());
-                } else {
-                    panel.setBackground(Color.WHITE);
-                }
-
-                panel.add(btn);
-                return panel;
-            }
-        });
+        tabelLaporanMasyarakat.getColumnModel().getColumn(8).setCellRenderer(new TableButtonRenderer());
+        tabelLaporanMasyarakat.getColumnModel().getColumn(9).setCellRenderer(new TableButtonRenderer());
     }
 
     private void setTableButtonListener() {
@@ -215,19 +213,23 @@ public class form_laporan extends javax.swing.JFrame {
                 int row = tabelLaporanMasyarakat.rowAtPoint(evt.getPoint());
                 int col = tabelLaporanMasyarakat.columnAtPoint(evt.getPoint());
 
-                if (row >= 0 && col == 8) {
+                if (row >= 0) {
                     String id = tabelLaporanMasyarakat.getValueAt(row, 1).toString();
                     String status = tabelLaporanMasyarakat.getValueAt(row, 7).toString().toLowerCase();
 
-                    if (status.equals("tolak") || status.equals("selesai")) {
-                        tampilkanPopupTanggapan(id, status);
-                    } else if (status.equals("belum")) {
-                        int conf = JOptionPane.showConfirmDialog(null, "Hapus pengaduan ini?", "Konfirmasi", JOptionPane.YES_NO_OPTION);
-                        if (conf == JOptionPane.YES_OPTION) {
-                            prosesHapusSederhana(id);
+                    if (col == 8) {
+                        if (status.equals("tolak") || status.equals("selesai")) {
+                            tampilkanPopupTanggapan(id, status);
+                        } else if (status.equals("belum")) {
+                            int conf = JOptionPane.showConfirmDialog(null, "Hapus laporan ini?", "Konfirmasi", 0);
+                            if (conf == 0) {
+                                prosesHapusSederhana(id);
+                            }
+                        } else {
+                            JOptionPane.showMessageDialog(null, "Laporan sedang diproses.");
                         }
-                    } else {
-                        JOptionPane.showMessageDialog(null, "Laporan sedang dalam proses petugas.");
+                    } else if (col == 9) {
+                        tampilkanPopupDetail(row);
                     }
                 }
             }
@@ -253,7 +255,7 @@ public class form_laporan extends javax.swing.JFrame {
 
     private void tampilkanPopupTanggapan(String id, String status) {
         try {
-            Connection conn =  config.connection.getConnection();
+            Connection conn = config.connection.getConnection();
             String sql = "SELECT tgl_tanggapan, isi_tanggapan FROM tanggapan WHERE id_pengaduan = ?";
             PreparedStatement ps = conn.prepareStatement(sql);
             ps.setString(1, id);
@@ -267,6 +269,7 @@ public class form_laporan extends javax.swing.JFrame {
                 Color temaWarna = status.equalsIgnoreCase("tolak") ? Color.RED : new Color(0, 153, 51);
 
                 JLabel lblTitle = new JLabel("<html><b style='color:rgb(" + temaWarna.getRed() + "," + temaWarna.getGreen() + "," + temaWarna.getBlue() + ");'>" + judulStr + "</b></html>");
+                lblTitle.setFont(new Font("Tahoma", Font.BOLD, 15));
 
                 JTextArea txt = new JTextArea("Diterima pada : " + rs.getString("tgl_tanggapan") + "\n\n" + rs.getString("isi_tanggapan"));
                 txt.setEditable(false);
@@ -289,7 +292,8 @@ public class form_laporan extends javax.swing.JFrame {
                     JButton btnHapus = new JButton("Hapus Data Permanen");
                     btnHapus.setBackground(Color.RED);
                     btnHapus.setForeground(Color.WHITE);
-                    btnHapus.setFont(new Font("Tahoma", Font.BOLD, 11));
+                    btnHapus.setMargin(new Insets(8, 8, 8, 8));
+                    btnHapus.setFont(new Font("Tahoma", Font.BOLD, 12));
                     btnHapus.addActionListener(e -> {
                         int c = JOptionPane.showConfirmDialog(null, "Hapus permanen pengaduan & tanggapan?", "Peringatan", JOptionPane.YES_NO_OPTION);
                         if (c == JOptionPane.YES_OPTION) {
@@ -302,7 +306,8 @@ public class form_laporan extends javax.swing.JFrame {
                     JButton btnPdf = new JButton("Export Laporan (PDF)");
                     btnPdf.setBackground(new Color(220, 53, 69));
                     btnPdf.setForeground(Color.WHITE);
-                    btnPdf.setFont(new Font("Tahoma", Font.BOLD, 11));
+                    btnPdf.setMargin(new Insets(8, 8, 8, 8));
+                    btnPdf.setFont(new Font("Tahoma", Font.BOLD, 12));
 
                     try {
                         ImageIcon icon = new ImageIcon("src/assets/icon/akar-icons--file-white.png");
@@ -333,8 +338,8 @@ public class form_laporan extends javax.swing.JFrame {
 
     private void hapusRelasi(String id) {
         try {
-            Connection conn =  config.connection.getConnection();
-            conn.setAutoCommit(false); // Transaksi
+            Connection conn = config.connection.getConnection();
+            conn.setAutoCommit(false);
             try {
                 PreparedStatement ps1 = conn.prepareStatement("DELETE FROM tanggapan WHERE id_pengaduan = ?");
                 ps1.setString(1, id);
@@ -720,4 +725,42 @@ public class form_laporan extends javax.swing.JFrame {
     private javax.swing.JTextField searchingLaporan;
     private javax.swing.JTable tabelLaporanMasyarakat;
     // End of variables declaration//GEN-END:variables
+
+    class TableButtonRenderer implements TableCellRenderer {
+
+        @Override
+        public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+            JPanel p = new JPanel(new GridBagLayout());
+            p.setOpaque(true);
+            p.setBackground(isSelected ? table.getSelectionBackground() : Color.WHITE);
+
+            JButton b = new JButton();
+            b.setFont(new Font("Tahoma", Font.BOLD, 10));
+            b.setPreferredSize(new Dimension(130, 30));
+
+            if (column == 8) {
+                String st = table.getValueAt(row, 7).toString().toLowerCase();
+                if (st.equals("belum")) {
+                    b.setText("Hapus");
+                    b.setBackground(Color.RED);
+                    b.setForeground(Color.WHITE);
+                } else if (st.equals("proses")) {
+                    b.setText("Diproses");
+                    // b.setEnabled(false);
+                    b.setBackground(Color.YELLOW);
+                    b.setForeground(Color.BLACK);
+                } else {
+                    b.setText("Tanggapan");
+                    b.setBackground(new Color(0, 102, 204));
+                    b.setForeground(Color.WHITE);
+                }
+            } else {
+                b.setText("Detail Laporan");
+                b.setBackground(new Color(52, 58, 64));
+                b.setForeground(Color.WHITE);
+            }
+            p.add(b);
+            return p;
+        }
+    }
 }

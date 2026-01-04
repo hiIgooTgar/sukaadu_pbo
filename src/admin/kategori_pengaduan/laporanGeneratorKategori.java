@@ -22,7 +22,7 @@ public class laporanGeneratorKategori {
             html.append("<html><head><style>");
             html.append("body { font-family: sans-serif; font-size: 10px; }");
             html.append(".header { text-align: center; border-bottom: 2px solid black; padding-bottom: 10px; }");
-            html.append(".title { text-align: center; margin: 20px 0; font-size: 16px; font-weight: bold; text-decoration: underline; }");
+            html.append(".title { text-align: center; margin: 20px 0; font-size: 16px; font-weight: bold; text-decoration: underline; display:inline-block; padding-top: 15px; }");
             html.append("table { width: 100%; border-collapse: collapse; margin-top: 30px; margin-bottom: 15px; }");
             html.append("th { background-color: rgb(0,153,255); color: white; padding: 5px; border: 1px solid #000; font-size: 13px; }");
             html.append("td { padding: 5px; border: 1px solid #000; vertical-align: middle; font-size: 12px; }");
@@ -34,6 +34,7 @@ public class laporanGeneratorKategori {
             html.append("<h3 style='margin-top:2px; margin-bottom:2px;'>APLIKASI LAYANAN PENGADUAN MASYARAKAT (SukaAdu)</h3>");
             html.append("<p style='margin-top:0;'>Jl. Raya SukaMaju No. 1, Kec. SukaAdu, Jawa Tengah 53211</p>");
             html.append("</div>");
+            html.append("<hr />");
 
             html.append("<div class='title'>DATA KATEGORI PENGADUAN</div>");
 

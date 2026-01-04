@@ -39,7 +39,7 @@ public class pdfGeneratorPengaduanId {
                 html.append("<html><head><style>");
                 html.append("body { font-family: sans-serif; font-size: 12px; line-height: 1.6; }");
                 html.append(".header { text-align: center; border-bottom: 2px solid black; padding-bottom: 10px; margin-bottom: 20px; }");
-                html.append(".title { text-align: center; font-size: 16px; font-weight: bold; text-decoration: underline; margin-bottom: 30px; }");
+                html.append(".title { text-align: center; font-size: 16px; font-weight: bold; text-decoration: underline; margin-bottom: 30px; display:inline-block; padding-top: 15px; }");
                 html.append(".label { font-weight: bold; width: 150px; display: inline-block; }");
                 html.append(".value { display: inline-block; }");
                 html.append(".foto-box { text-align: center; margin-top: 20px; }");
@@ -60,9 +60,10 @@ public class pdfGeneratorPengaduanId {
                 html.append("<h3 style='margin-top:2px; margin-bottom:2px;'>APLIKASI LAYANAN PENGADUAN MASYARAKAT (SukaAdu)</h3>");
                 html.append("<p style='margin-top:0;'>Jl. Raya SukaMaju No. 1, Kec. SukaAdu, Jawa Tengah 53211</p>");
                 html.append("</div>");
+                html.append("<hr />");
 
                 html.append("<div class='title'>DETAIL LAPORAN PENGADUAN ID ").append(idPengaduan).append("</div>");
-                html.append("<br /><br />");
+                html.append("<br />");
 
                 html.append("<div class='row-detail-pengadu'>");
                 html.append("<div class='img-p' style='padding-top: 10px;'>");
