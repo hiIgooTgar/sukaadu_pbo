@@ -90,9 +90,6 @@ public class pdfGeneratorPengaduanId {
 
                 html.append("</div>");
 
-                html.append("<br />");
-                html.append("<hr />");
-                html.append("<br />");
                 html.append("<div class='content-box'><strong>Judul Pengaduan : </strong><br/>").append(rs.getString("judul_pengaduan")).append("</div>");
                 html.append("<div class='content-box'><strong>Isi Deskripsi : </strong><br/>").append(rs.getString("deskripsi_pengaduan")).append("</div>");
                 html.append("<br />");
@@ -105,7 +102,7 @@ public class pdfGeneratorPengaduanId {
                     html.append("</div>");
                 }
 
-                html.append("<br /><br />");
+                html.append("<br />");
                 String isiTanggapan = rs.getString("isi_tanggapan");
                 html.append("<div class='tanggapan-section'>");
                 html.append("<strong>Tanggapan Admin:</strong><br/>");

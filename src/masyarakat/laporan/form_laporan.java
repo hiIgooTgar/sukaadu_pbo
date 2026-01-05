@@ -109,7 +109,7 @@ public class form_laporan extends javax.swing.JFrame {
 
     private void tampilkanPopupDetail(int row) {
         JPanel panel = new JPanel(new BorderLayout(10, 10));
-        panel.setPreferredSize(new Dimension(350, 400));
+        panel.setPreferredSize(new Dimension(400, 400));
         panel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
         String judul = tabelLaporanMasyarakat.getValueAt(row, 3).toString();
@@ -319,7 +319,7 @@ public class form_laporan extends javax.swing.JFrame {
 
                     btnPdf.addActionListener(e -> {
                         JFileChooser chooser = new JFileChooser();
-                        chooser.setSelectedFile(new File("laporan_pengaduan_masyarkat_id_" + id + ".pdf"));
+                        chooser.setSelectedFile(new File("laporan_pengaduan_masyarakat_id_" + id + ".pdf"));
                         if (chooser.showSaveDialog(null) == JFileChooser.APPROVE_OPTION) {
                             pdfGeneratorPengaduanId.exportToPDF(id, chooser.getSelectedFile().getAbsolutePath());
                             JOptionPane.showMessageDialog(null, "PDF Pengaduan Berhasil di-export");

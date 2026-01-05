@@ -85,14 +85,9 @@ public class pdfGeneratorPengaduanId {
                 html.append("<div class='content-box'><span class='label'>Kategori</span>: ").append(rs.getString("nama_kategori")).append("</div>");
                 html.append("<div class='content-box'><span class='label'>Status Laporan</span>: <span style='font-weight:bold; color:#blue;'>").append(rs.getString("status").toUpperCase()).append("</span></div>");
                 html.append("</div>");
-
                 html.append("<div class='clear'></div>");
-
                 html.append("</div>");
-
-                html.append("<br />");
-                html.append("<hr />");
-                html.append("<br />");
+                
                 html.append("<div class='content-box'><strong>Judul Pengaduan : </strong><br/>").append(rs.getString("judul_pengaduan")).append("</div>");
                 html.append("<div class='content-box'><strong>Isi Deskripsi : </strong><br/>").append(rs.getString("deskripsi_pengaduan")).append("</div>");
                 html.append("<br />");
