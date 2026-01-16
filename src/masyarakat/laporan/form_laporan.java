@@ -711,7 +711,6 @@ public class form_laporan extends javax.swing.JFrame {
     private javax.swing.JButton btnExportPengaduan;
     private javax.swing.JButton btnExportPengaduanExcel;
     private javax.swing.JButton btn_sign_out;
-    private javax.swing.JButton exportData;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel7;
