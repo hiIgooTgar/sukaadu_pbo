@@ -7,7 +7,7 @@ a. Users admin :
   - password = sukamaju
 
 b. Users masyarakat :
-  - email = igopbo@gmail.com
+  - email = igotegarprambudhy@gmail.com
   - password = sukamaju
 
 

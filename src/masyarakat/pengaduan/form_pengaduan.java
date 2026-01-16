@@ -436,8 +436,7 @@ public class form_pengaduan extends javax.swing.JFrame {
             if (session.getEmail() == null || session.getPassword() == null || session.getNik() == null || session.getNama().isEmpty()
                     || session.getTempatLahir() == null || session.getTanggalLahir() == null
                     || session.getAgama() == null || session.getJenisKelamin() == null
-                    || session.getRt() == null || session.getRt().isEmpty()
-                    || session.getRw() == null || session.getRw().isEmpty()
+                    || session.getRt() == null || session.getRw().isEmpty()
                     || session.getPekerjaan() == null || session.getPernikahan() == null) {
 
                 JOptionPane.showMessageDialog(this,
